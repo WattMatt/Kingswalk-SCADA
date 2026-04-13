@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import AuthError
 from app.core.rbac import get_current_user
-from app.core.security import decode_token, generate_csrf_token
+from app.core.security import create_mfa_pending_token, decode_token, generate_csrf_token
 from app.db.engine import get_db
 from app.db.models import User
 from app.repos import user_repo
@@ -69,11 +69,29 @@ async def login(
     request: Request,
     response: Response,
     db: AsyncSession = Depends(get_db),
-) -> dict[str, str]:
-    """Authenticate with email + password. Sets HttpOnly cookies on success."""
+) -> dict[str, object]:
+    """Authenticate with email + password.
+
+    If MFA is enabled: sets mfa_pending cookie, returns {"mfa_required": true}.
+    If MFA is disabled: sets full auth cookies, returns {"message": "Login successful"}.
+    """
     ip = request.client.host if request.client else None
     user_agent = request.headers.get("user-agent")
+
     user = await auth_service.authenticate(db, body.email, body.password, ip)
+
+    if user.mfa_enabled:
+        mfa_token = create_mfa_pending_token(user_id=str(user.id))
+        response.set_cookie(
+            "mfa_pending",
+            mfa_token,
+            httponly=True,
+            secure=True,
+            samesite="strict",
+            max_age=300,
+        )
+        return {"mfa_required": True}
+
     access_token, refresh_token, _ = await auth_service.issue_tokens(
         db, user, ip, user_agent
     )
