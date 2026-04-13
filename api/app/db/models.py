@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Text, func
+from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Text, func
 from sqlalchemy.dialects.postgresql import INET, JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -20,7 +20,11 @@ class User(Base):
     email: Mapped[str] = mapped_column(Text, unique=True, nullable=False)
     full_name: Mapped[str] = mapped_column(Text, nullable=False)
     password_hash: Mapped[str] = mapped_column(Text, nullable=False)
-    role: Mapped[str] = mapped_column(Text, nullable=False, default="viewer")
+    role: Mapped[str] = mapped_column(
+        Enum("admin", "operator", "viewer", name="user_role", schema="core", create_type=False),
+        nullable=False,
+        default="viewer",
+    )
     mfa_secret: Mapped[str | None] = mapped_column(Text, nullable=True)
     mfa_enabled: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
