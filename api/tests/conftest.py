@@ -21,7 +21,7 @@ TestSessionLocal = async_sessionmaker(bind=test_engine, expire_on_commit=False)
 
 
 async def override_get_db() -> AsyncGenerator[AsyncSession, None]:
-    engine = create_async_engine(TEST_DB_URL, echo=False)
+    engine = _make_test_engine()
     session_factory = async_sessionmaker(bind=engine, expire_on_commit=False)
     async with session_factory() as session:
         yield session
