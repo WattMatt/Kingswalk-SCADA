@@ -25,8 +25,9 @@ class NotFoundError(AppError):
         super().__init__(message, status_code=404)
 
 
-async def app_error_handler(request: Request, exc: AppError) -> JSONResponse:
+async def app_error_handler(request: Request, exc: Exception) -> JSONResponse:
     """Convert AppError into a consistent JSON error response."""
+    assert isinstance(exc, AppError)
     return JSONResponse(
         status_code=exc.status_code,
         content={"error": exc.message},
