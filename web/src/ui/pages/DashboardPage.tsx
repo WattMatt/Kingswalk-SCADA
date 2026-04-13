@@ -8,7 +8,11 @@ export function DashboardPage() {
   const { user, clearUser } = useAuthStore();
 
   async function handleLogout() {
-    await apiClient.logout();
+    try {
+      await apiClient.logout();
+    } catch {
+      // Always clear local auth even if the server call fails
+    }
     clearUser();
     navigate("/login");
   }

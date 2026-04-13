@@ -7,7 +7,7 @@ function getCsrfToken(): string {
   const match = document.cookie
     .split("; ")
     .find((row) => row.startsWith("csrf_token="));
-  return match ? (match.split("=")[1] ?? "") : "";
+  return match ? match.split("=").slice(1).join("=") : "";
 }
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {

@@ -16,7 +16,7 @@ export function App() {
       .me()
       .then(setUser)
       .catch(() => clearUser());
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [setUser, clearUser]);
 
   return (
     <BrowserRouter>
