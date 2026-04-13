@@ -1,5 +1,5 @@
 // web/src/core/api-client.ts
-import type { User } from "./types";
+import type { MfaConfirmResponse, MfaEnrollResponse, User } from "./types";
 
 const BASE_URL = "/api";
 
@@ -37,7 +37,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
 export const apiClient = {
   login: (email: string, password: string) =>
-    request<{ message: string }>("/auth/login", {
+    request<{ message?: string; mfa_required?: boolean }>("/auth/login", {
       method: "POST",
       body: JSON.stringify({ email, password }),
     }),
@@ -46,4 +46,23 @@ export const apiClient = {
     request<{ message: string }>("/auth/logout", { method: "POST" }),
 
   me: () => request<User>("/auth/me"),
+
+  mfa: {
+    enroll: () => request<MfaEnrollResponse>("/auth/mfa/enroll", { method: "POST" }),
+    confirmEnrollment: (code: string) =>
+      request<MfaConfirmResponse>("/auth/mfa/confirm-enrollment", {
+        method: "POST",
+        body: JSON.stringify({ code }),
+      }),
+    verifyTotp: (code: string) =>
+      request<{ message: string }>("/auth/mfa/verify", {
+        method: "POST",
+        body: JSON.stringify({ code }),
+      }),
+    useRecoveryCode: (code: string) =>
+      request<{ message: string }>("/auth/mfa/recovery", {
+        method: "POST",
+        body: JSON.stringify({ code }),
+      }),
+  },
 };

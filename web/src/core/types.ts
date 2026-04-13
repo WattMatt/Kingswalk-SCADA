@@ -18,3 +18,12 @@ export interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
 }
+
+export interface MfaEnrollResponse {
+  provisioning_uri: string;
+}
+
+export interface MfaConfirmResponse {
+  recovery_codes: string[];
+  message: string;
+}

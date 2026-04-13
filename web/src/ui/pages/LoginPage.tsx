@@ -17,7 +17,11 @@ export function LoginPage() {
     setError(null);
     setLoading(true);
     try {
-      await apiClient.login(email, password);
+      const result = await apiClient.login(email, password);
+      if (result.mfa_required) {
+        navigate("/mfa");
+        return;
+      }
       const user = await apiClient.me();
       setUser(user);
       navigate("/dashboard");

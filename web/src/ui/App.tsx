@@ -6,6 +6,8 @@ import { useAuthStore } from "@/core/auth-store";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { DashboardPage } from "./pages/DashboardPage";
 import { LoginPage } from "./pages/LoginPage";
+import { MfaChallengePage } from "./pages/MfaChallengePage";
+import { MfaEnrollPage } from "./pages/MfaEnrollPage";
 
 export function App() {
   const { setUser, clearUser } = useAuthStore();
@@ -22,6 +24,15 @@ export function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/mfa" element={<MfaChallengePage />} />
+        <Route
+          path="/mfa/enroll"
+          element={
+            <ProtectedRoute>
+              <MfaEnrollPage />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/dashboard"
           element={
