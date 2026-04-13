@@ -1,0 +1,1060 @@
+{
+  "643.E.301": [
+    {
+      "db_code": "DB-17",
+      "name": "PEP CELL",
+      "rating": "60A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "56.81",
+      "ct": null,
+      "cable": "4C x 25mm\u00b2 ALU CABLE   4C x 25mm\u00b2 AL"
+    },
+    {
+      "db_code": "DB-17A",
+      "name": "LL KING PIE",
+      "rating": "60A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "61.03",
+      "ct": null,
+      "cable": "4C x 25mm\u00b2 ALU CABLE   4C x 25mm\u00b2 ALU CABLE   4C x 25mm\u00b2 AL"
+    },
+    {
+      "db_code": "DB-17B",
+      "name": "PIE MR PRICE CELL",
+      "rating": "60A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "50.44",
+      "ct": null,
+      "cable": "4C x 25mm\u00b2 ALU CABLE   4C x 25mm\u00b2 ALU CABLE"
+    },
+    {
+      "db_code": "DB-18",
+      "name": "SHOPRITE",
+      "rating": "800A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TS2",
+      "area_m2": "2716.13",
+      "ct": "800/5A",
+      "cable": "4Cx120mm\u00b2 ALU CABLES                  4C"
+    },
+    {
+      "db_code": "DB-19",
+      "name": "TRUWORTHS",
+      "rating": "200A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "922.22",
+      "ct": "200/5A",
+      "cable": "4C x 120mm\u00b2 ALU CABLE            4C x 70mm\u00b2 ALU"
+    },
+    {
+      "db_code": "DB-20/21",
+      "name": "THS IDENTITY / SYNC",
+      "rating": "200A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "332.36",
+      "ct": "120/5A",
+      "cable": "4C x 70mm\u00b2 ALU CABLE"
+    },
+    {
+      "db_code": "DB-22/23",
+      "name": "JET",
+      "rating": "200A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "842.63",
+      "ct": "200/5A",
+      "cable": "4C x 120mm\u00b2 ALU CABLE"
+    },
+    {
+      "db_code": "DB-24",
+      "name": "SPORTSCENE",
+      "rating": "120A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "401.98",
+      "ct": "120/5A",
+      "cable": "4C x 70mm\u00b2 ALU CABLE"
+    },
+    {
+      "db_code": "DB-24A",
+      "name": "",
+      "rating": "120A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": null,
+      "ct": null,
+      "cable": null
+    },
+    {
+      "db_code": "DB-26",
+      "name": "EXACT",
+      "rating": "120A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "319.09",
+      "ct": "120/5A",
+      "cable": null
+    }
+  ],
+  "643.E.302": [
+    {
+      "db_code": "DB-05",
+      "name": "",
+      "rating": "600A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TS2",
+      "area_m2": null,
+      "ct": null,
+      "cable": null
+    },
+    {
+      "db_code": "DB-08",
+      "name": "",
+      "rating": "150A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": null,
+      "ct": null,
+      "cable": null
+    },
+    {
+      "db_code": "DB-08A",
+      "name": "",
+      "rating": "60A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": null,
+      "ct": null,
+      "cable": null
+    },
+    {
+      "db_code": "DB-09",
+      "name": "",
+      "rating": "80A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": null,
+      "ct": null,
+      "cable": null
+    },
+    {
+      "db_code": "DB-10",
+      "name": "",
+      "rating": "80A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": null,
+      "ct": null,
+      "cable": null
+    },
+    {
+      "db_code": "DB-11",
+      "name": "",
+      "rating": "80A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": null,
+      "ct": null,
+      "cable": null
+    },
+    {
+      "db_code": "DB-11A",
+      "name": "",
+      "rating": "100A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": null,
+      "ct": null,
+      "cable": null
+    },
+    {
+      "db_code": "DB-12",
+      "name": "",
+      "rating": "120A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": null,
+      "ct": null,
+      "cable": null
+    }
+  ],
+  "643.E.303": [
+    {
+      "db_code": "DB-01",
+      "name": "VACANT",
+      "rating": "80A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "131.50",
+      "ct": null,
+      "cable": "4C x 35mm\u00b2 ALU CABLE   4C x 120mm\u00b2 A"
+    },
+    {
+      "db_code": "DB-01A",
+      "name": "T WATLOO",
+      "rating": "200A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TS2",
+      "area_m2": "800.25",
+      "ct": "200/5A",
+      "cable": "4C x 35mm\u00b2 ALU CABLE   4C x 120mm\u00b2 ALU CABLE   4C x 50mm\u00b2 A"
+    },
+    {
+      "db_code": "DB-01B",
+      "name": "KINGSLEY BEVERAGES",
+      "rating": "100A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "250.67",
+      "ct": null,
+      "cable": "4C x 120mm\u00b2 ALU CABLE   4C x 50mm\u00b2 ALU CABLE"
+    },
+    {
+      "db_code": "DB-01C",
+      "name": "KIT KAT",
+      "rating": "120A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "472.30",
+      "ct": "120/5A",
+      "cable": "4C x 70mm\u00b2 ALU CABLE             4C"
+    },
+    {
+      "db_code": "DB-01D",
+      "name": "CAPITEC ATM",
+      "rating": "60A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "28.52",
+      "ct": null,
+      "cable": "4C x 25mm\u00b2 ALU CABLE               4C x 35mm\u00b2"
+    },
+    {
+      "db_code": "DB-02",
+      "name": "VACANT",
+      "rating": "80A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "150.49",
+      "ct": null,
+      "cable": "4C x 35mm\u00b2 ALU CABLE"
+    },
+    {
+      "db_code": "DB-03",
+      "name": "MAX BOX",
+      "rating": "60A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "50.20",
+      "ct": null,
+      "cable": "4C x 25mm\u00b2 ALU CABLE"
+    },
+    {
+      "db_code": "DB-03A",
+      "name": "ACKERMANS CONNECT",
+      "rating": "60A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "52.13",
+      "ct": null,
+      "cable": "4C x 25mm\u00b2 ALU CABLE"
+    },
+    {
+      "db_code": "DB-04",
+      "name": "",
+      "rating": "60A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": null,
+      "ct": null,
+      "cable": null
+    }
+  ],
+  "643.E.304": [
+    {
+      "db_code": "DB-13/14",
+      "name": "VACANT",
+      "rating": "200A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "682.41",
+      "ct": "200/5A",
+      "cable": "4C x 120mm\u00b2 ALU CABLE   4C x 120mm\u00b2"
+    },
+    {
+      "db_code": "DB-15",
+      "name": "CLICKS",
+      "rating": "200A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "802.76",
+      "ct": "200/5A",
+      "cable": "4C x 120mm\u00b2 ALU CABLE   4C x 50mm\u00b2 AL"
+    },
+    {
+      "db_code": "DB-16",
+      "name": "S SHOPRITE LIQUOR",
+      "rating": "100A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "252.08",
+      "ct": null,
+      "cable": "4C x 120mm\u00b2 ALU CABLE   4C x 50mm\u00b2 ALU CABLE"
+    }
+  ],
+  "643.E.305": [
+    {
+      "db_code": "DB-74",
+      "name": "SPUR",
+      "rating": "150A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "355.31",
+      "ct": "150/5A",
+      "cable": "4C x 95mm\u00b2 ALU CABLE    4C x 95mm\u00b2 A"
+    },
+    {
+      "db_code": "DB-75",
+      "name": "KFC",
+      "rating": "150A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "201.83",
+      "ct": "150/5A",
+      "cable": "4C x 95mm\u00b2 ALU CABLE      4C x 95mm\u00b2"
+    },
+    {
+      "db_code": "DB-76",
+      "name": "STEERS & DEBONAIRS",
+      "rating": "150A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "273.55",
+      "ct": "150/5A",
+      "cable": "4C x 95mm\u00b2 ALU CABLE        4C x 95m"
+    },
+    {
+      "db_code": "DB-77",
+      "name": "RS ROCOMAMA'S",
+      "rating": "150A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "275.80",
+      "ct": "150/5A",
+      "cable": "4C x 95mm\u00b2 ALU CABLE         4C x 35m"
+    },
+    {
+      "db_code": "DB-78",
+      "name": "CONVERSE",
+      "rating": "80A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "112.34",
+      "ct": null,
+      "cable": "4C x 35mm\u00b2 ALU CABLE     4C x 25mm\u00b2 AL"
+    },
+    {
+      "db_code": "DB-78A",
+      "name": "CAPITEC ATM",
+      "rating": "60A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "10.06",
+      "ct": null,
+      "cable": "4C x 25mm\u00b2 ALU CABLE      4C x 25mm\u00b2 A"
+    },
+    {
+      "db_code": "DB-80",
+      "name": "ATM VACANT",
+      "rating": "60A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "79.48",
+      "ct": null,
+      "cable": "4C x 25mm\u00b2 ALU CABLE        4C x 25m"
+    },
+    {
+      "db_code": "DB-80A",
+      "name": "SPECSAVERS",
+      "rating": "60A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "74.41",
+      "ct": null,
+      "cable": "4C x 25mm\u00b2 ALU CABLE   4C x 25mm\u00b2 AL"
+    },
+    {
+      "db_code": "DB-81",
+      "name": "ERS VACANT",
+      "rating": "60A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "52.85",
+      "ct": null,
+      "cable": "4C x 25mm\u00b2 ALU CABLE   4C x 25mm\u00b2 ALU CABLE   4C x 35mm\u00b2 AL"
+    },
+    {
+      "db_code": "DB-82",
+      "name": "SKIPPER BAR",
+      "rating": "80A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "151.91",
+      "ct": null,
+      "cable": "4C x 35mm\u00b2 ALU CABLE"
+    },
+    {
+      "db_code": "DB-83",
+      "name": "VACANT",
+      "rating": "100A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "214.78",
+      "ct": null,
+      "cable": "4C x 50mm\u00b2 ALU CABLE"
+    },
+    {
+      "db_code": "DB-84",
+      "name": "DUNNS",
+      "rating": "100A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "275.71",
+      "ct": null,
+      "cable": "4C x 50mm\u00b2 ALU CABLE"
+    },
+    {
+      "db_code": "DB-85",
+      "name": "VICTORY LAB",
+      "rating": "80A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "191.81",
+      "ct": null,
+      "cable": "4C x 35mm\u00b2 ALU CABLE"
+    },
+    {
+      "db_code": "DB-86",
+      "name": "VACANT",
+      "rating": "100A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "271.76",
+      "ct": null,
+      "cable": "4C x 50mm\u00b2 ALU CABLE"
+    },
+    {
+      "db_code": "DB-86A",
+      "name": "POWER FASHION",
+      "rating": "120A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "307.18",
+      "ct": "120/5A",
+      "cable": "4C x 70mm\u00b2 ALU CABLE"
+    },
+    {
+      "db_code": "DB-87",
+      "name": "VACANT",
+      "rating": "100A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "204.28",
+      "ct": null,
+      "cable": "4C x 50mm\u00b2 ALU CABLE"
+    },
+    {
+      "db_code": "DB-88",
+      "name": "VACANT",
+      "rating": "100A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "247.83",
+      "ct": null,
+      "cable": "4C x 50mm\u00b2 ALU CABLE"
+    },
+    {
+      "db_code": "DB-89",
+      "name": "VACANT",
+      "rating": "80A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "121.88",
+      "ct": null,
+      "cable": "4C x 35mm\u00b2 ALU CABLE"
+    },
+    {
+      "db_code": "DB-89A",
+      "name": "NEDBANK ATM",
+      "rating": "60A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "10.06",
+      "ct": null,
+      "cable": "4C x 25mm\u00b2 ALU CABLE"
+    },
+    {
+      "db_code": "DB-89B",
+      "name": "CAKE ZONE",
+      "rating": "60A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "56.30",
+      "ct": null,
+      "cable": "4C x 25mm\u00b2 ALU CABLE"
+    },
+    {
+      "db_code": "DB-89C",
+      "name": "VACANT",
+      "rating": "60A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "55.79",
+      "ct": null,
+      "cable": "4C x 25mm\u00b2 ALU CABLE"
+    },
+    {
+      "db_code": "DB-90",
+      "name": "",
+      "rating": "100A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": null,
+      "ct": null,
+      "cable": null
+    },
+    {
+      "db_code": "DB-92",
+      "name": "ABS",
+      "rating": "100A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": null,
+      "ct": null,
+      "cable": null
+    },
+    {
+      "db_code": "DB-SR1",
+      "name": "TORE ROOM 1",
+      "rating": "60A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": null,
+      "ct": null,
+      "cable": null
+    }
+  ],
+  "643.E.306": [
+    {
+      "db_code": "DB-46",
+      "name": "FNB",
+      "rating": "100A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "252.38",
+      "ct": null,
+      "cable": "4C x 50mm\u00b2 ALU CABLE     4C x 50mm\u00b2"
+    },
+    {
+      "db_code": "DB-47",
+      "name": "STANDARD BANK",
+      "rating": "100A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "221.46",
+      "ct": null,
+      "cable": "4C x 50mm\u00b2 ALU CABLE    4C x 25mm\u00b2 A"
+    },
+    {
+      "db_code": "DB-48",
+      "name": "ANK VACANT",
+      "rating": "60A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "65.55",
+      "ct": null,
+      "cable": "4C x 50mm\u00b2 ALU CABLE    4C x 25mm\u00b2 ALU CABLE    4C x 25mm\u00b2 A"
+    },
+    {
+      "db_code": "DB-48A",
+      "name": "ATM",
+      "rating": "60A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "11.71",
+      "ct": null,
+      "cable": "4C x 25mm\u00b2 ALU CABLE    4C x 25mm\u00b2 ALU CABLE    4C x 25mm\u00b2 A"
+    },
+    {
+      "db_code": "DB-48B",
+      "name": "VACANT",
+      "rating": "60A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "59.95",
+      "ct": null,
+      "cable": "4C x 25mm\u00b2 ALU CABLE        4C x 35mm\u00b2"
+    },
+    {
+      "db_code": "DB-48C",
+      "name": "VACANT",
+      "rating": "80A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "104.72",
+      "ct": null,
+      "cable": "4C x 35mm\u00b2 ALU CABLE    4C x 50mm\u00b2"
+    },
+    {
+      "db_code": "DB-52A",
+      "name": "PEP HOME",
+      "rating": "100A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "271.11",
+      "ct": null,
+      "cable": "4C x 50mm\u00b2 ALU CABLE   4C x 120mm\u00b2 AL"
+    },
+    {
+      "db_code": "DB-53",
+      "name": "OME MR PRICE & KIDS",
+      "rating": "200A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "613.09",
+      "ct": "200/5A",
+      "cable": "4C x 50mm\u00b2 ALU CABLE   4C x 120mm\u00b2 ALU CABLE   4C x 50mm\u00b2 AL"
+    },
+    {
+      "db_code": "DB-54",
+      "name": "& KIDS TEKKIE TOWN",
+      "rating": "100A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "279.70",
+      "ct": null,
+      "cable": "4C x 120mm\u00b2 ALU CABLE   4C x 50mm\u00b2 ALU CABLE               4"
+    },
+    {
+      "db_code": "DB-55",
+      "name": "VACANT",
+      "rating": "120A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "426.76",
+      "ct": "120/5A",
+      "cable": "4C x 70mm\u00b2 ALU CABLE"
+    },
+    {
+      "db_code": "DB-57",
+      "name": "ACKERMANS",
+      "rating": "200A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "750.78",
+      "ct": "200/5A",
+      "cable": "4C x 120mm\u00b2 ALU CABLE             4C x 70m"
+    },
+    {
+      "db_code": "DB-58/59",
+      "name": "STUDIO 88",
+      "rating": "120A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "402.66",
+      "ct": "120/5A",
+      "cable": "4C x 70mm\u00b2 ALU CABLE                    4C x 70m"
+    },
+    {
+      "db_code": "DB-60",
+      "name": "THE FIX",
+      "rating": "120A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "313.38",
+      "ct": "120/5A",
+      "cable": "4C x 70mm\u00b2 ALU CABLE                        4C x 35"
+    },
+    {
+      "db_code": "DB-62",
+      "name": "SIDE STEP",
+      "rating": "80A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "105.75",
+      "ct": null,
+      "cable": "4C x 35mm\u00b2 ALU CABLE                 4C x 12"
+    },
+    {
+      "db_code": "DB-64",
+      "name": "VACANT",
+      "rating": "200A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "618.94",
+      "ct": "200/5A",
+      "cable": "4C x 120mm\u00b2 ALU CABLE"
+    },
+    {
+      "db_code": "DB-66",
+      "name": "POLO",
+      "rating": "80A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "112.55",
+      "ct": null,
+      "cable": "4C x 35mm\u00b2 ALU CABLE"
+    },
+    {
+      "db_code": "DB-66A",
+      "name": "STERNS / VACANT",
+      "rating": "60A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "57.90",
+      "ct": null,
+      "cable": "4C x 25mm\u00b2 ALU CABLE"
+    },
+    {
+      "db_code": "DB-67",
+      "name": "PEDRO",
+      "rating": "80A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "154.30",
+      "ct": null,
+      "cable": "4C x 35mm\u00b2 ALU CABLE"
+    },
+    {
+      "db_code": "DB-67A",
+      "name": "VACANT",
+      "rating": "60A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": null,
+      "ct": null,
+      "cable": "4C x 25mm\u00b2 ALU CABLE               4"
+    },
+    {
+      "db_code": "DB-68",
+      "name": "ROMANS PIZZA",
+      "rating": "150A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "124.91",
+      "ct": "150/5A",
+      "cable": "4C x 95mm\u00b2 ALU CABLE"
+    },
+    {
+      "db_code": "DB-69",
+      "name": "HUNGRY LION",
+      "rating": "150A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "145.54",
+      "ct": "150/5A",
+      "cable": "4C x 95mm\u00b2 ALU CABLE"
+    },
+    {
+      "db_code": "DB-70",
+      "name": "",
+      "rating": "150A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": null,
+      "ct": null,
+      "cable": null
+    }
+  ],
+  "643.E.307": [
+    {
+      "db_code": "DB-38",
+      "name": "",
+      "rating": "100A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": null,
+      "ct": null,
+      "cable": null
+    },
+    {
+      "db_code": "DB-38A",
+      "name": "",
+      "rating": "100A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": null,
+      "ct": null,
+      "cable": null
+    },
+    {
+      "db_code": "DB-39",
+      "name": "",
+      "rating": "200A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TS1",
+      "area_m2": null,
+      "ct": null,
+      "cable": null
+    },
+    {
+      "db_code": "DB-FIRE",
+      "name": "",
+      "rating": "60A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": null,
+      "ct": null,
+      "cable": null
+    },
+    {
+      "db_code": "DB-DOMESTIC",
+      "name": "",
+      "rating": "60A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": null,
+      "ct": null,
+      "cable": null
+    },
+    {
+      "db_code": "DB-SR2",
+      "name": "",
+      "rating": "60A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": null,
+      "ct": null,
+      "cable": null
+    }
+  ],
+  "643.E.308": [
+    {
+      "db_code": "DB-40",
+      "name": "VACANT",
+      "rating": "60A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "65.95",
+      "ct": null,
+      "cable": "4C x 25mm\u00b2 ALU CABLE   4C x 25mm\u00b2 AL"
+    },
+    {
+      "db_code": "DB-40A",
+      "name": "T VACANT",
+      "rating": "60A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "65.95",
+      "ct": null,
+      "cable": "4C x 25mm\u00b2 ALU CABLE   4C x 25mm\u00b2 ALU CABLE   4C x 25mm\u00b2 AL"
+    },
+    {
+      "db_code": "DB-41",
+      "name": "T TORGA OPTICAL",
+      "rating": "60A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "62.19",
+      "ct": null,
+      "cable": "4C x 25mm\u00b2 ALU CABLE   4C x 25mm\u00b2 ALU CABLE"
+    },
+    {
+      "db_code": "DB-42",
+      "name": "AMERICAN SWISS",
+      "rating": "60A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "60.03",
+      "ct": null,
+      "cable": "4C x 25mm\u00b2 ALU CABLE            4C x"
+    },
+    {
+      "db_code": "DB-43",
+      "name": "OLD MUTUAL",
+      "rating": "100A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "216.94",
+      "ct": null,
+      "cable": "4C x 50mm\u00b2 ALU CABLE               4C x 50mm\u00b2 AL"
+    },
+    {
+      "db_code": "DB-44",
+      "name": "CAPITEC",
+      "rating": "100A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "275.29",
+      "ct": null,
+      "cable": "4C x 50mm\u00b2 ALU CABLE"
+    },
+    {
+      "db_code": "DB-44A",
+      "name": "MOJO",
+      "rating": "120A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "304.08",
+      "ct": "120/5A",
+      "cable": "4C x 70mm\u00b2 ALU CABLE"
+    },
+    {
+      "db_code": "DB-45",
+      "name": "BRADLOWS",
+      "rating": "120A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "329.93",
+      "ct": "120/5A",
+      "cable": "4C x 70mm\u00b2 ALU CABLE"
+    },
+    {
+      "db_code": "DB-45A",
+      "name": "",
+      "rating": "120A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": null,
+      "ct": null,
+      "cable": null
+    },
+    {
+      "db_code": "DB-93",
+      "name": "CASHBUILD",
+      "rating": "200A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "1416.65",
+      "ct": "200/5A",
+      "cable": null
+    }
+  ],
+  "643.E.309": [
+    {
+      "db_code": "DB-27/28",
+      "name": "TOTALSPORTS",
+      "rating": "120A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "381.34",
+      "ct": "120/5A",
+      "cable": "4C x 70mm\u00b2 ALU CABLE     4C x 50mm\u00b2"
+    },
+    {
+      "db_code": "DB-29",
+      "name": "S VACANT",
+      "rating": "100A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "287.09",
+      "ct": null,
+      "cable": "4C x 50mm\u00b2 ALU CABLE   4C x 50mm\u00b2 AL"
+    },
+    {
+      "db_code": "DB-30",
+      "name": "T LEGIT",
+      "rating": "100A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "251.80",
+      "ct": null,
+      "cable": "4C x 50mm\u00b2 ALU CABLE   4C x 50mm\u00b2 ALU CABLE   4C x 50mm\u00b2 AL"
+    },
+    {
+      "db_code": "DB-31",
+      "name": "JOHN GRAIG",
+      "rating": "100A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "211.80",
+      "ct": null,
+      "cable": "4C x 50mm\u00b2 ALU CABLE   4C x 50mm\u00b2 ALU CABLE"
+    },
+    {
+      "db_code": "DB-32",
+      "name": "VACANT",
+      "rating": "80A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "187.76",
+      "ct": null,
+      "cable": "4C x 35mm\u00b2 ALU CABLE                 4C x"
+    },
+    {
+      "db_code": "DB-32A",
+      "name": "CODE",
+      "rating": "80A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "152.07",
+      "ct": null,
+      "cable": "4C x 35mm\u00b2 ALU CABLE         4C x 35mm\u00b2 A"
+    },
+    {
+      "db_code": "DB-33",
+      "name": "REFINERY",
+      "rating": "80A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "162.03",
+      "ct": null,
+      "cable": "4C x 35mm\u00b2 ALU CABLE                   4C x"
+    },
+    {
+      "db_code": "DB-34",
+      "name": "VOLPES",
+      "rating": "120A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "451.62",
+      "ct": "120/5A",
+      "cable": "4C x 70mm\u00b2 ALU CABLE"
+    },
+    {
+      "db_code": "DB-36",
+      "name": "ARTHUR FORD",
+      "rating": "60A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "50.24",
+      "ct": null,
+      "cable": "4C x 25mm\u00b2 ALU CABLE"
+    },
+    {
+      "db_code": "DB-37",
+      "name": "DISCHEM",
+      "rating": "200A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": "900.47",
+      "ct": null,
+      "cable": null
+    },
+    {
+      "db_code": "DB-SEC",
+      "name": "SECURITY",
+      "rating": "60A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": null,
+      "ct": null,
+      "cable": null
+    },
+    {
+      "db_code": "DB-CM",
+      "name": "",
+      "rating": "80A TP",
+      "mp_code": "MP2",
+      "breaker_code": "TM3",
+      "area_m2": null,
+      "ct": null,
+      "cable": null
+    }
+  ]
+}
