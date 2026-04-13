@@ -3,10 +3,11 @@ import { useState, type FormEvent } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { apiClient } from "@/core/api-client";
 import { useAuthStore } from "@/core/auth-store";
+import type { User } from "@/core/types";
 
 export function MfaChallengePage() {
   const navigate = useNavigate();
-  const { mfaPending, setMfaPending } = useAuthStore();
+  const { mfaPending, setMfaPending, setUser } = useAuthStore();
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -26,6 +27,9 @@ export function MfaChallengePage() {
       } else {
         await apiClient.mfa.verifyTotp(code);
       }
+      // Hydrate the auth store — ProtectedRoute checks isAuthenticated synchronously
+      const user: User = await apiClient.me();
+      setUser(user);
       setMfaPending(false);
       navigate("/dashboard");
     } catch (err) {
