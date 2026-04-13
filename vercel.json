@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "buildCommand": "cd web && npm ci && npm run build",
+  "outputDirectory": "web/dist",
+  "installCommand": "cd web && npm ci",
+  "framework": null,
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "https://api.placeholder.kingswalk.scada/api/$1" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

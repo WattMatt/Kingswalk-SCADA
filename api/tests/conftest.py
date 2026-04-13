@@ -1,3 +1,4 @@
+import os
 from collections.abc import AsyncGenerator
 
 import pytest
@@ -7,8 +8,12 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from app.db.engine import get_db
 from app.main import app
 
-# Test database — host port 5433 maps to container port 5432
-TEST_DB_URL = "postgresql+asyncpg://scada:scada_dev@localhost:5433/kingswalk_scada_test"
+# Test database — host port 5433 maps to container port 5432 (local dev default).
+# In CI, override via TEST_DB_URL env var (port 5432, no conflict with Homebrew PG).
+TEST_DB_URL = os.getenv(
+    "TEST_DB_URL",
+    "postgresql+asyncpg://scada:scada_dev@localhost:5433/kingswalk_scada_test",
+)
 
 
 def _make_test_engine():  # type: ignore[no-untyped-def]
