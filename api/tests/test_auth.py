@@ -66,14 +66,26 @@ async def test_login_missing_fields_returns_422(client: AsyncClient, clean_table
 async def test_login_success_sets_httponly_cookies(
     client: AsyncClient, operator_user: dict
 ) -> None:
-    response = await client.post("/auth/login", json=operator_user)
+    response = await client.post(
+        "/auth/login",
+        json={"email": operator_user["email"], "password": operator_user["password"]},
+    )
     assert response.status_code == 200
     assert "access_token" in response.cookies
     assert "refresh_token" in response.cookies
-    assert "csrf_token" in response.cookies
-    cookie_header = response.headers.get("set-cookie", "")
-    assert "HttpOnly" in cookie_header
-    assert "samesite=strict" in cookie_header.lower()
+
+    # Check all Set-Cookie headers for HttpOnly and SameSite
+    set_cookie_headers = response.headers.get_list("set-cookie")
+    access_cookie = next((h for h in set_cookie_headers if "access_token=" in h), "")
+    refresh_cookie = next((h for h in set_cookie_headers if "refresh_token=" in h), "")
+    csrf_cookie = next((h for h in set_cookie_headers if "csrf_token=" in h), "")
+
+    assert "HttpOnly" in access_cookie
+    assert "samesite=strict" in access_cookie.lower()
+    assert "HttpOnly" in refresh_cookie
+    assert "samesite=strict" in refresh_cookie.lower()
+    assert "HttpOnly" not in csrf_cookie  # CSRF must be JS-readable
+    assert "samesite=strict" in csrf_cookie.lower()
 
 
 @pytest.mark.asyncio
@@ -109,4 +121,33 @@ async def test_me_after_logout_returns_401(
     await client.post("/auth/login", json=operator_user)
     await client.post("/auth/logout")
     response = await client.get("/auth/me")
+    assert response.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_refresh_rotates_tokens(client: AsyncClient, operator_user: dict) -> None:
+    """Refresh endpoint issues new tokens and rotates the refresh token."""
+    # Login to get initial tokens
+    login = await client.post(
+        "/auth/login",
+        json={"email": operator_user["email"], "password": operator_user["password"]},
+    )
+    assert login.status_code == 200
+
+    # Call refresh
+    response = await client.post("/auth/refresh")
+    assert response.status_code == 200
+
+    # New access token issued
+    new_access = response.cookies.get("access_token")
+    assert new_access is not None
+
+    # /me still works with the new token
+    me = await client.get("/auth/me")
+    assert me.status_code == 200
+
+
+@pytest.mark.asyncio
+async def test_refresh_without_cookie_returns_401(client: AsyncClient) -> None:
+    response = await client.post("/auth/refresh")
     assert response.status_code == 401

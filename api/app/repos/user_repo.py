@@ -30,17 +30,18 @@ async def get_user_by_id(db: AsyncSession, user_id: uuid.UUID) -> User | None:
 
 async def create_session(
     db: AsyncSession,
+    session_id: uuid.UUID,
     user_id: uuid.UUID,
-    refresh_token_raw: str,
+    refresh_token: str,
     ip: str | None,
     user_agent: str | None,
 ) -> Session:
-    """Create a new session, storing SHA-256 hash of the refresh token."""
+    """Create a new session, storing the SHA-256 hash of the refresh token."""
     session = Session(
+        id=session_id,
         user_id=user_id,
-        refresh_hash=hashlib.sha256(refresh_token_raw.encode()).hexdigest(),
-        expires_at=datetime.now(UTC)
-        + timedelta(seconds=settings.refresh_token_ttl_seconds),
+        refresh_hash=hashlib.sha256(refresh_token.encode()).hexdigest(),
+        expires_at=datetime.now(UTC) + timedelta(seconds=settings.refresh_token_ttl_seconds),
         ip=ip,
         user_agent=user_agent,
     )

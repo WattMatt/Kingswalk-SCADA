@@ -1,12 +1,15 @@
+import uuid
+
 from fastapi import APIRouter, Depends, Request, Response
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import AuthError
 from app.core.rbac import get_current_user
-from app.core.security import generate_csrf_token
+from app.core.security import decode_token, generate_csrf_token
 from app.db.engine import get_db
 from app.db.models import User
+from app.repos import user_repo
 from app.services import auth_service
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -53,6 +56,7 @@ def _set_auth_cookies(response: Response, access_token: str, refresh_token: str)
         "csrf_token",
         generate_csrf_token(),
         httponly=False,
+        secure=True,
         samesite="strict",
         max_age=900,
         path="/",
@@ -70,7 +74,7 @@ async def login(
     ip = request.client.host if request.client else None
     user_agent = request.headers.get("user-agent")
     user = await auth_service.authenticate(db, body.email, body.password, ip)
-    access_token, refresh_token = await auth_service.issue_tokens(
+    access_token, refresh_token, _ = await auth_service.issue_tokens(
         db, user, ip, user_agent
     )
     _set_auth_cookies(response, access_token, refresh_token)
@@ -94,11 +98,23 @@ async def refresh(
 
 
 @router.post("/logout")
-async def logout(response: Response) -> dict[str, str]:
-    """Clear all auth cookies."""
-    response.delete_cookie("access_token", path="/")
+async def logout(
+    request: Request,
+    response: Response,
+    db: AsyncSession = Depends(get_db),
+) -> dict[str, str]:
+    """Clear auth cookies and revoke the server-side session."""
+    refresh_token = request.cookies.get("refresh_token")
+    if refresh_token:
+        try:
+            payload = decode_token(refresh_token, expected_aud="refresh")
+            session_id = uuid.UUID(str(payload["session_id"]))
+            await user_repo.revoke_session(db, session_id)
+        except Exception:
+            pass  # Token invalid/expired — still clear cookies
+    response.delete_cookie("access_token")
     response.delete_cookie("refresh_token", path="/auth/refresh")
-    response.delete_cookie("csrf_token", path="/")
+    response.delete_cookie("csrf_token")
     return {"message": "Logged out"}
 
 

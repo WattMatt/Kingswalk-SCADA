@@ -1,3 +1,5 @@
+from collections.abc import AsyncGenerator
+
 import pytest
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
@@ -18,11 +20,11 @@ test_engine = _make_test_engine()
 TestSessionLocal = async_sessionmaker(bind=test_engine, expire_on_commit=False)
 
 
-async def override_get_db() -> AsyncSession:  # type: ignore[return]
+async def override_get_db() -> AsyncGenerator[AsyncSession, None]:
     engine = create_async_engine(TEST_DB_URL, echo=False)
     session_factory = async_sessionmaker(bind=engine, expire_on_commit=False)
     async with session_factory() as session:
-        yield session  # type: ignore[misc]
+        yield session
     await engine.dispose()
 
 
