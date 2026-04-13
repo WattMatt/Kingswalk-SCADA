@@ -12,12 +12,10 @@ TEST_DB_URL = "postgresql+asyncpg://scada:scada_dev@localhost:5433/kingswalk_sca
 
 
 def _make_test_engine():  # type: ignore[no-untyped-def]
+    # Fresh engine per call: pytest-asyncio creates a new event loop per test function.
+    # A module-level async engine's pool is bound to the loop at creation time, so
+    # reusing it across tests causes InterfaceError. Per-call creation is the correct fix.
     return create_async_engine(TEST_DB_URL, echo=False, pool_size=2, max_overflow=0)
-
-
-# Module-level engine + session factory (recreated to avoid cross-loop issues)
-test_engine = _make_test_engine()
-TestSessionLocal = async_sessionmaker(bind=test_engine, expire_on_commit=False)
 
 
 async def override_get_db() -> AsyncGenerator[AsyncSession, None]:
