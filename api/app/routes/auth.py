@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, Request, Response
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.cookies import set_auth_cookies
 from app.core.exceptions import AuthError
 from app.core.rbac import get_current_user
 from app.core.security import create_mfa_pending_token, decode_token, generate_csrf_token
@@ -30,37 +31,6 @@ class UserResponse(BaseModel):
     full_name: str
     role: str
 
-
-def _set_auth_cookies(response: Response, access_token: str, refresh_token: str) -> None:
-    """Set HttpOnly, Secure, SameSite=Strict auth cookies per SPEC §A.5."""
-    response.set_cookie(
-        "access_token",
-        access_token,
-        httponly=True,
-        secure=True,
-        samesite="strict",
-        max_age=900,
-        path="/",
-    )
-    response.set_cookie(
-        "refresh_token",
-        refresh_token,
-        httponly=True,
-        secure=True,
-        samesite="strict",
-        path="/auth/refresh",
-        max_age=604800,
-    )
-    # CSRF: NOT HttpOnly — must be readable by JS for double-submit pattern
-    response.set_cookie(
-        "csrf_token",
-        generate_csrf_token(),
-        httponly=False,
-        secure=True,
-        samesite="strict",
-        max_age=900,
-        path="/",
-    )
 
 
 @router.post("/login")
@@ -95,7 +65,7 @@ async def login(
     access_token, refresh_token, _ = await auth_service.issue_tokens(
         db, user, ip, user_agent
     )
-    _set_auth_cookies(response, access_token, refresh_token)
+    set_auth_cookies(response, access_token, refresh_token, csrf_token=generate_csrf_token())
     return {"message": "Login successful"}
 
 
@@ -111,7 +81,7 @@ async def refresh(
         raise AuthError("No refresh token")
     ip = request.client.host if request.client else None
     new_access, new_refresh = await auth_service.refresh_tokens(db, token, ip)
-    _set_auth_cookies(response, new_access, new_refresh)
+    set_auth_cookies(response, new_access, new_refresh, csrf_token=generate_csrf_token())
     return {"message": "Token refreshed"}
 
 

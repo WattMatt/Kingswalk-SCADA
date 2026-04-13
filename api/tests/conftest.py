@@ -1,6 +1,8 @@
 import os
 from collections.abc import AsyncGenerator
+from urllib.parse import parse_qs, urlparse
 
+import pyotp
 import pytest
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
@@ -90,3 +92,20 @@ async def operator_user(clean_tables: None) -> dict:  # noqa: ARG001
 @pytest.fixture
 async def admin_user(clean_tables: None) -> dict:  # noqa: ARG001
     return await _seed_user("admin@test.scada", "AdminPass456!", role="admin")
+
+
+@pytest.fixture
+async def mfa_operator(client: AsyncClient, operator_user: dict) -> dict:
+    """Login, enroll MFA, confirm enrollment. Returns credentials + totp_secret + recovery_codes."""
+    await client.post("/auth/login", json={
+        "email": operator_user["email"],
+        "password": operator_user["password"],
+    })
+    enroll_resp = await client.post("/auth/mfa/enroll")
+    uri = enroll_resp.json()["provisioning_uri"]
+    secret = parse_qs(urlparse(uri).query)["secret"][0]
+    code = pyotp.TOTP(secret).now()
+    confirm_resp = await client.post("/auth/mfa/confirm-enrollment", json={"code": code})
+    recovery_codes = confirm_resp.json()["recovery_codes"]
+    await client.post("/auth/logout")
+    return {**operator_user, "totp_secret": secret, "recovery_codes": recovery_codes}

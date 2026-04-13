@@ -63,25 +63,6 @@ async def test_confirm_enrollment_correct_code_returns_recovery_codes(
         assert len(parts) == 8
 
 
-# --- MFA-enabled user fixture ---
-
-@pytest.fixture
-async def mfa_operator(client: AsyncClient, operator_user: dict) -> dict:
-    """Login, enroll MFA, confirm enrollment. Returns credentials + totp_secret + recovery_codes."""
-    await client.post("/auth/login", json={
-        "email": operator_user["email"],
-        "password": operator_user["password"],
-    })
-    enroll_resp = await client.post("/auth/mfa/enroll")
-    uri = enroll_resp.json()["provisioning_uri"]
-    secret = parse_qs(urlparse(uri).query)["secret"][0]
-    code = pyotp.TOTP(secret).now()
-    confirm_resp = await client.post("/auth/mfa/confirm-enrollment", json={"code": code})
-    recovery_codes = confirm_resp.json()["recovery_codes"]
-    await client.post("/auth/logout")
-    return {**operator_user, "totp_secret": secret, "recovery_codes": recovery_codes}
-
-
 @pytest.mark.asyncio
 async def test_mfa_login_returns_mfa_required(client: AsyncClient, mfa_operator: dict) -> None:
     response = await client.post("/auth/login", json={
@@ -134,6 +115,7 @@ async def test_mfa_recovery_code_issues_tokens(
     response = await client.post("/auth/mfa/recovery", json={"code": code})
     assert response.status_code == 200
     assert "access_token" in response.cookies
+    assert "mfa_pending" not in response.cookies
 
 
 @pytest.mark.asyncio

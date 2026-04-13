@@ -12,31 +12,23 @@ Login MFA flow (user has mfa_pending cookie from POST /auth/login):
 import uuid
 
 import jwt
-from fastapi import APIRouter, Cookie, Depends, Response
+from fastapi import APIRouter, Cookie, Depends, Request, Response
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.cookies import set_auth_cookies
 from app.core.exceptions import AuthError
 from app.core.rbac import get_current_user
-from app.core.security import decode_mfa_pending_token
+from app.core.security import decode_mfa_pending_token, generate_csrf_token
 from app.db.engine import get_db
 from app.db.models import User
 from app.repos import user_repo
-from app.routes.auth import _set_auth_cookies
 from app.services import auth_service, mfa_service
 
 router = APIRouter(prefix="/auth/mfa", tags=["mfa"])
 
 
-class ConfirmEnrollmentRequest(BaseModel):
-    code: str
-
-
-class MfaVerifyRequest(BaseModel):
-    code: str
-
-
-class MfaRecoveryRequest(BaseModel):
+class MfaCodeRequest(BaseModel):
     code: str
 
 
@@ -52,7 +44,7 @@ async def enroll(
 
 @router.post("/confirm-enrollment")
 async def confirm_enrollment(
-    body: ConfirmEnrollmentRequest,
+    body: MfaCodeRequest,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> dict[str, object]:
@@ -66,7 +58,8 @@ async def confirm_enrollment(
 
 @router.post("/verify")
 async def verify_totp(
-    body: MfaVerifyRequest,
+    body: MfaCodeRequest,
+    request: Request,
     response: Response,
     mfa_pending: str | None = Cookie(default=None),
     db: AsyncSession = Depends(get_db),
@@ -85,17 +78,18 @@ async def verify_totp(
 
     await mfa_service.verify_totp_for_user(db, user, body.code)
 
-    access_token, refresh_token, _ = await auth_service.issue_tokens(
-        db, user, ip=None, user_agent=None
-    )
-    _set_auth_cookies(response, access_token, refresh_token)
+    ip = request.client.host if request.client else None
+    user_agent = request.headers.get("user-agent")
+    access_token, refresh_token, _ = await auth_service.issue_tokens(db, user, ip, user_agent)
+    set_auth_cookies(response, access_token, refresh_token, csrf_token=generate_csrf_token())
     response.delete_cookie("mfa_pending")
     return {"message": "MFA verified"}
 
 
 @router.post("/recovery")
 async def use_recovery_code(
-    body: MfaRecoveryRequest,
+    body: MfaCodeRequest,
+    request: Request,
     response: Response,
     mfa_pending: str | None = Cookie(default=None),
     db: AsyncSession = Depends(get_db),
@@ -114,9 +108,9 @@ async def use_recovery_code(
 
     await mfa_service.verify_recovery_code_for_user(db, user, body.code)
 
-    access_token, refresh_token, _ = await auth_service.issue_tokens(
-        db, user, ip=None, user_agent=None
-    )
-    _set_auth_cookies(response, access_token, refresh_token)
+    ip = request.client.host if request.client else None
+    user_agent = request.headers.get("user-agent")
+    access_token, refresh_token, _ = await auth_service.issue_tokens(db, user, ip, user_agent)
+    set_auth_cookies(response, access_token, refresh_token, csrf_token=generate_csrf_token())
     response.delete_cookie("mfa_pending")
     return {"message": "Recovery code accepted"}
