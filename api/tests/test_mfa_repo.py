@@ -1,6 +1,7 @@
 # api/tests/test_mfa_repo.py
 import os
 import uuid
+from collections.abc import AsyncGenerator
 
 import pytest
 from sqlalchemy import text
@@ -16,7 +17,7 @@ TEST_DB_URL = os.getenv(
 
 
 @pytest.fixture
-async def db_session() -> AsyncSession:
+async def db_session() -> AsyncGenerator[AsyncSession, None]:
     """Fresh engine + session per test — avoids asyncio event loop conflicts."""
     engine = create_async_engine(TEST_DB_URL, echo=False, pool_size=2, max_overflow=0)
     SessionLocal = async_sessionmaker(bind=engine, expire_on_commit=False)

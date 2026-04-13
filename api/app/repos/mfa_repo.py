@@ -62,6 +62,6 @@ async def verify_and_consume_recovery_code(
             rc.used_at = datetime.now(UTC)
             await db.commit()
             return True
-        except (VerifyMismatchError, VerificationError, InvalidHash, Exception):
+        except (VerifyMismatchError, VerificationError, InvalidHash):
             continue
     return False
