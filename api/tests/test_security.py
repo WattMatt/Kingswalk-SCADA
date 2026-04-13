@@ -77,3 +77,19 @@ def test_csrf_token_length() -> None:
 def test_csrf_tokens_are_unique() -> None:
     tokens = {generate_csrf_token() for _ in range(10)}
     assert len(tokens) == 10  # all unique
+
+
+def test_mfa_pending_token_contains_correct_claims() -> None:
+    from app.core.security import create_mfa_pending_token, decode_mfa_pending_token
+    token = create_mfa_pending_token(user_id="user-123")
+    payload = decode_mfa_pending_token(token)
+    assert payload["sub"] == "user-123"
+    assert payload["aud"] == "mfa_pending"
+    assert payload["iss"] == "kingswalk-scada"
+
+
+def test_access_token_cannot_be_used_as_mfa_pending() -> None:
+    from app.core.security import create_access_token, decode_mfa_pending_token
+    token = create_access_token(user_id="user-123", role="operator")
+    with pytest.raises(Exception):
+        decode_mfa_pending_token(token)

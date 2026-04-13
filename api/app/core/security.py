@@ -59,6 +59,30 @@ def create_refresh_token(user_id: str, session_id: str) -> str:
     )
 
 
+def create_mfa_pending_token(user_id: str) -> str:
+    """Create a 5-minute MFA-pending token (aud: mfa_pending).
+
+    Issued after successful password check for MFA-enabled users.
+    Client must exchange this for full tokens via POST /auth/mfa/verify.
+    """
+    return _make_token(
+        {"sub": user_id, "aud": "mfa_pending"},
+        ttl_seconds=300,  # 5 minutes
+    )
+
+
+def decode_mfa_pending_token(token: str) -> dict[str, object]:
+    """Decode and validate an mfa_pending token. Raises jwt.PyJWTError on failure."""
+    return jwt.decode(
+        token,
+        settings.jwt_secret,
+        algorithms=["HS256"],
+        audience="mfa_pending",
+        issuer=settings.jwt_issuer,
+        options={"require": ["exp", "iss", "aud", "iat"]},
+    )
+
+
 def decode_token(token: str, expected_aud: str) -> dict[str, object]:
     """
     Decode and fully validate a JWT.
