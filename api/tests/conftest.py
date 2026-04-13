@@ -5,7 +5,9 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
+from app.core.security import hash_password
 from app.db.engine import get_db
+from app.db.models import User
 from app.main import app
 
 # Test database — host port 5433 maps to container port 5432 (local dev default).
@@ -14,6 +16,8 @@ TEST_DB_URL = os.getenv(
     "TEST_DB_URL",
     "postgresql+asyncpg://scada:scada_dev@localhost:5433/kingswalk_scada_test",
 )
+
+_TEST_DB_URL = TEST_DB_URL
 
 
 def _make_test_engine():  # type: ignore[no-untyped-def]
@@ -58,3 +62,31 @@ async def client() -> AsyncClient:
         base_url="https://test",
     ) as ac:
         yield ac
+
+
+async def _seed_user(email: str, password: str, role: str = "operator") -> dict:
+    """Insert a test user and return credentials. Uses fresh engine to avoid loop issues."""
+    engine = create_async_engine(_TEST_DB_URL, echo=False)
+    session_factory = async_sessionmaker(bind=engine, expire_on_commit=False)
+    async with session_factory() as session:
+        user = User(
+            email=email,
+            full_name="Test User",
+            password_hash=hash_password(password),
+            role=role,
+            is_active=True,
+        )
+        session.add(user)
+        await session.commit()
+    await engine.dispose()
+    return {"email": email, "password": password}
+
+
+@pytest.fixture
+async def operator_user(clean_tables: None) -> dict:  # noqa: ARG001
+    return await _seed_user("operator@test.scada", "SecurePass123!")
+
+
+@pytest.fixture
+async def admin_user(clean_tables: None) -> dict:  # noqa: ARG001
+    return await _seed_user("admin@test.scada", "AdminPass456!", role="admin")

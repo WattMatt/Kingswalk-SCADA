@@ -1,39 +1,7 @@
 import pytest
 from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
-from app.core.security import hash_password
-from app.db.models import User
-
-_TEST_DB_URL = "postgresql+asyncpg://scada:scada_dev@localhost:5433/kingswalk_scada_test"
-
-
-async def _seed_user(email: str, password: str, role: str = "operator") -> dict:
-    """Insert a test user and return credentials. Uses fresh engine to avoid loop issues."""
-    engine = create_async_engine(_TEST_DB_URL, echo=False)
-    session_factory = async_sessionmaker(bind=engine, expire_on_commit=False)
-    async with session_factory() as session:
-        user = User(
-            email=email,
-            full_name="Test User",
-            password_hash=hash_password(password),
-            role=role,
-            is_active=True,
-        )
-        session.add(user)
-        await session.commit()
-    await engine.dispose()
-    return {"email": email, "password": password}
-
-
-@pytest.fixture
-async def operator_user(clean_tables: None) -> dict:  # noqa: ARG001
-    return await _seed_user("operator@test.scada", "SecurePass123!")
-
-
-@pytest.fixture
-async def admin_user(clean_tables: None) -> dict:  # noqa: ARG001
-    return await _seed_user("admin@test.scada", "AdminPass456!", role="admin")
+from tests.conftest import _seed_user
 
 
 @pytest.mark.asyncio
