@@ -13,6 +13,9 @@ class Settings(BaseSettings):
     access_token_ttl_seconds: int = 900
     refresh_token_ttl_seconds: int = 604800
     csrf_secret: str
+    # MFA secret encryption key — base64-encoded 32 bytes
+    # Generate: python -c "import secrets,base64; print(base64.b64encode(secrets.token_bytes(32)).decode())"  # noqa: E501
+    mfa_encryption_key: str
     environment: str = "development"
     log_level: str = "info"
     cors_origins: list[str] = ["http://localhost:5173"]
