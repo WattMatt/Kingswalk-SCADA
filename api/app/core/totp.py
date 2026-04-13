@@ -13,7 +13,7 @@ _VALID_WINDOW = 1  # ±1 period tolerance for clock skew
 
 def generate_totp_secret() -> str:
     """Generate a new cryptographically random TOTP secret (base32, 32 chars / 20 bytes)."""
-    return pyotp.random_base32()
+    return pyotp.random_base32(length=32)
 
 
 def get_provisioning_uri(secret: str, email: str) -> str:
