@@ -82,7 +82,7 @@ export function MfaChallengePage() {
         </button>
 
         <button
-          onClick={() => navigate("/login")}
+          onClick={() => { setMfaPending(false); navigate("/login"); }}
           className="mt-2 w-full text-center text-sm text-slate-500 hover:text-slate-400"
         >
           Back to login
