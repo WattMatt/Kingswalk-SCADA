@@ -1,6 +1,7 @@
 // web/src/ui/pages/MfaEnrollPage.tsx
 import { useEffect, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
+import { QRCodeSVG } from "qrcode.react";
 import { apiClient } from "@/core/api-client";
 
 type Step = "qr" | "recovery";
@@ -69,7 +70,7 @@ export function MfaEnrollPage() {
 
         {provisioningUri ? (
           <div className="mb-4 flex justify-center rounded-lg bg-white p-4">
-            <p className="break-all text-center text-xs text-slate-600">{provisioningUri}</p>
+            <QRCodeSVG value={provisioningUri} size={180} />
           </div>
         ) : (
           <div className="mb-4 flex h-32 items-center justify-center rounded-lg bg-slate-800">

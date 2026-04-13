@@ -1,16 +1,20 @@
 // web/src/ui/pages/MfaChallengePage.tsx
 import { useState, type FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { apiClient } from "@/core/api-client";
 import { useAuthStore } from "@/core/auth-store";
 
 export function MfaChallengePage() {
   const navigate = useNavigate();
-  const { setUser } = useAuthStore();
+  const { mfaPending, setMfaPending } = useAuthStore();
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [useRecovery, setUseRecovery] = useState(false);
+
+  if (!mfaPending) {
+    return <Navigate to="/login" replace />;
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -22,8 +26,7 @@ export function MfaChallengePage() {
       } else {
         await apiClient.mfa.verifyTotp(code);
       }
-      const user = await apiClient.me();
-      setUser(user);
+      setMfaPending(false);
       navigate("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Verification failed");

@@ -6,7 +6,7 @@ import { useAuthStore } from "@/core/auth-store";
 
 export function LoginPage() {
   const navigate = useNavigate();
-  const { setUser } = useAuthStore();
+  const { setUser, setMfaPending } = useAuthStore();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -19,6 +19,7 @@ export function LoginPage() {
     try {
       const result = await apiClient.login(email, password);
       if (result.mfa_required) {
+        setMfaPending(true);
         navigate("/mfa");
         return;
       }
