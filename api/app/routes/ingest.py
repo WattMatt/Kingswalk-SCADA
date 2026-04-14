@@ -11,7 +11,7 @@ from datetime import datetime
 
 import structlog
 from fastapi import APIRouter, Depends, Header, HTTPException, status
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
@@ -54,7 +54,9 @@ class SampleIn(BaseModel):
 
 
 class BatchIn(BaseModel):
-    samples: list[SampleIn]
+    # 500 rows/batch matches edge CloudSync batch size; cap prevents memory exhaustion
+    # from malformed or compromised edge gateways.
+    samples: list[SampleIn] = Field(default=[], max_length=500)
 
 
 class BatchOut(BaseModel):

@@ -41,9 +41,8 @@ def _triggered_severity(threshold: Threshold, value: float) -> str | None:
     for severity, low_attr, high_attr in _BANDS:
         low: float | None = getattr(threshold, low_attr, None)
         high: float | None = getattr(threshold, high_attr, None)
-        if low is not None and value < low:
-            return severity
-        if high is not None and value > high:
+        # Fires if value is outside [low, high] — either boundary alone, or both.
+        if (low is not None and value < low) or (high is not None and value > high):
             return severity
     return None
 
