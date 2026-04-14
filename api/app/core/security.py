@@ -10,6 +10,8 @@ from app.core.config import settings
 # argon2id: m=65536 KiB, t=3 iterations, p=4 parallelism (OWASP recommended, SPEC §C.1)
 _hasher = PasswordHasher(time_cost=3, memory_cost=65536, parallelism=4)
 
+INVITE_TOKEN_TTL_SECONDS: int = 48 * 3600  # 48 hours
+
 
 def hash_password(password: str) -> str:
     """Hash a plaintext password with argon2id. Never store plaintext passwords."""
@@ -108,7 +110,7 @@ def create_invite_token(invite_id: str, email: str, role: str) -> str:
     """
     return _make_token(
         {"sub": invite_id, "email": email, "role": role, "aud": "invite"},
-        ttl_seconds=172800,  # 48 hours
+        ttl_seconds=INVITE_TOKEN_TTL_SECONDS,
     )
 
 

@@ -1,11 +1,13 @@
 # api/app/repos/invite_repo.py
 import hashlib
+import hmac
 import uuid
 from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.security import INVITE_TOKEN_TTL_SECONDS
 from app.db.models import Invite
 
 
@@ -30,7 +32,7 @@ async def create_invite_with_id(
         role=role,
         token_hash=hashlib.sha256(raw_token.encode()).hexdigest(),
         invited_by=invited_by,
-        expires_at=datetime.now(UTC) + timedelta(hours=48),
+        expires_at=datetime.now(UTC) + timedelta(seconds=INVITE_TOKEN_TTL_SECONDS),
     )
     db.add(invite)
     await db.commit()
@@ -56,7 +58,7 @@ async def get_valid_invite(
     if invite is None:
         return None
     expected_hash = hashlib.sha256(raw_token.encode()).hexdigest()
-    return invite if invite.token_hash == expected_hash else None
+    return invite if hmac.compare_digest(invite.token_hash, expected_hash) else None
 
 
 async def accept_invite(db: AsyncSession, invite: Invite) -> None:
