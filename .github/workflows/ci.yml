@@ -30,6 +30,7 @@ jobs:
   api-test:
     name: API — Tests
     runs-on: ubuntu-latest
+    needs: api-lint-type
     defaults:
       run:
         working-directory: api
@@ -49,6 +50,9 @@ jobs:
           --health-retries 10
     env:
       DATABASE_URL: "postgresql+asyncpg://scada:scada_dev@localhost:5432/kingswalk_scada_test"
+      # conftest.py reads TEST_DB_URL (defaults to port 5433 for local dev); CI uses port 5432
+      TEST_DB_URL: "postgresql+asyncpg://scada:scada_dev@localhost:5432/kingswalk_scada_test"
+      # Fallback is a valid base64-encoded 32-byte key — safe for CI, never for production
       MFA_ENCRYPTION_KEY: ${{ secrets.MFA_ENCRYPTION_KEY || 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=' }}
     steps:
       - uses: actions/checkout@v4
