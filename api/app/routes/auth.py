@@ -137,10 +137,9 @@ async def onboard(
     """
     try:
         payload = decode_invite_token(body.token)
+        invite_id = uuid.UUID(str(payload["sub"]))
     except Exception as exc:
         raise AuthError("Invalid or expired invite token") from exc
-
-    invite_id = uuid.UUID(str(payload["sub"]))
     inv = await invite_repo.get_valid_invite(db, invite_id, body.token)
     if inv is None:
         raise AuthError("Invite not found, already used, or expired")
@@ -153,8 +152,10 @@ async def onboard(
     user_agent = request.headers.get("user-agent")
 
     password_hash = hash_password(body.password)
-    user = await user_repo.create_user(db, inv.email, body.full_name, password_hash, inv.role)
-    await invite_repo.accept_invite(db, inv)
+    user = user_repo.stage_user(db, inv.email, body.full_name, password_hash, inv.role)
+    invite_repo.stage_accept_invite(inv)
+    await db.commit()
+    await db.refresh(user)  # populate user.id, user.role etc.
 
     access_token, refresh_token, _ = await auth_service.issue_tokens(db, user, ip, user_agent)
     set_auth_cookies(response, access_token, refresh_token, csrf_token=generate_csrf_token())

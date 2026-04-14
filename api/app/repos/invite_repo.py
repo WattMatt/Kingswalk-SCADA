@@ -88,6 +88,14 @@ async def get_valid_invite(
     return invite if hmac.compare_digest(invite.token_hash, expected_hash) else None
 
 
+def stage_accept_invite(invite: Invite) -> None:
+    """
+    Stage invite acceptance without committing.
+    Call db.commit() after all related writes are staged.
+    """
+    invite.accepted_at = datetime.now(UTC)
+
+
 async def accept_invite(db: AsyncSession, invite: Invite) -> None:
     """Mark invite as accepted. Subsequent calls to get_valid_invite() will return None."""
     invite.accepted_at = datetime.now(UTC)

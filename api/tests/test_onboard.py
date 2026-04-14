@@ -86,10 +86,11 @@ async def test_onboard_invalid_token(http_client, clean_tables):
 async def test_onboard_token_cannot_be_reused(http_client, db_session):
     """After successful onboard, the same token must be rejected."""
     raw_token = await _make_invite_token(db_session, email="once@example.com")
-    await http_client.post(
+    first_resp = await http_client.post(
         "/auth/onboard",
         json={"token": raw_token, "full_name": "Once Only", "password": "SecurePass999!"},
     )
+    assert first_resp.status_code == 200  # ensure first use succeeded
     resp = await http_client.post(
         "/auth/onboard",
         json={"token": raw_token, "full_name": "Once Only", "password": "SecurePass999!"},

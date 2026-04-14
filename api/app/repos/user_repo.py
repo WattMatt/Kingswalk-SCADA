@@ -107,6 +107,28 @@ async def write_audit(
     await db.commit()
 
 
+def stage_user(
+    db: AsyncSession,
+    email: str,
+    full_name: str,
+    password_hash: str,
+    role: str,
+) -> User:
+    """
+    Stage a user for insertion without committing.
+    Call db.commit() + db.refresh(user) after all related writes are staged.
+    """
+    user = User(
+        email=email,
+        full_name=full_name,
+        password_hash=password_hash,
+        role=role,
+        is_active=True,
+    )
+    db.add(user)
+    return user
+
+
 async def create_user(
     db: AsyncSession,
     email: str,
