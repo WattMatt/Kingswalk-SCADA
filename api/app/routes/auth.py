@@ -7,10 +7,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.cookies import set_auth_cookies
 from app.core.exceptions import AuthError
 from app.core.rbac import get_current_user
-from app.core.security import create_mfa_pending_token, decode_token, generate_csrf_token
+from app.core.security import (
+    create_mfa_pending_token,
+    decode_invite_token,
+    decode_token,
+    generate_csrf_token,
+    hash_password,
+)
 from app.db.engine import get_db
 from app.db.models import User
-from app.repos import user_repo
+from app.repos import invite_repo, user_repo
 from app.services import auth_service
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -20,6 +26,14 @@ class LoginRequest(BaseModel):
     """Login credentials."""
 
     email: EmailStr
+    password: str
+
+
+class OnboardRequest(BaseModel):
+    """Onboarding payload — submitted with invite JWT from email link."""
+
+    token: str
+    full_name: str
     password: str
 
 
@@ -104,6 +118,52 @@ async def logout(
     response.delete_cookie("refresh_token", path="/auth/refresh")
     response.delete_cookie("csrf_token")
     return {"message": "Logged out"}
+
+
+@router.post("/onboard")
+async def onboard(
+    body: OnboardRequest,
+    request: Request,
+    response: Response,
+    db: AsyncSession = Depends(get_db),
+) -> dict[str, object]:
+    """
+    Complete user onboarding from an invite link.
+
+    Decodes the invite JWT, verifies the invite record is valid and unused,
+    creates the user account, marks the invite accepted, and issues full auth tokens.
+
+    Returns mfa_required=True for admin/operator roles — frontend must redirect to /mfa/enroll.
+    """
+    try:
+        payload = decode_invite_token(body.token)
+    except Exception as exc:
+        raise AuthError("Invalid or expired invite token") from exc
+
+    invite_id = uuid.UUID(str(payload["sub"]))
+    inv = await invite_repo.get_valid_invite(db, invite_id, body.token)
+    if inv is None:
+        raise AuthError("Invite not found, already used, or expired")
+
+    existing = await user_repo.get_user_by_email(db, inv.email)
+    if existing is not None:
+        raise AuthError("An account with this email already exists")
+
+    ip = request.client.host if request.client else None
+    user_agent = request.headers.get("user-agent")
+
+    password_hash = hash_password(body.password)
+    user = await user_repo.create_user(db, inv.email, body.full_name, password_hash, inv.role)
+    await invite_repo.accept_invite(db, inv)
+
+    access_token, refresh_token, _ = await auth_service.issue_tokens(db, user, ip, user_agent)
+    set_auth_cookies(response, access_token, refresh_token, csrf_token=generate_csrf_token())
+    await user_repo.write_audit(db, action="auth.onboard", user_id=user.id, ip=ip)
+
+    return {
+        "message": "Account created",
+        "mfa_required": user.role in ("admin", "operator"),
+    }
 
 
 @router.get("/me")

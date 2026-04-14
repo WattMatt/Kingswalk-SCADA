@@ -105,3 +105,46 @@ async def write_audit(
     )
     db.add(entry)
     await db.commit()
+
+
+async def create_user(
+    db: AsyncSession,
+    email: str,
+    full_name: str,
+    password_hash: str,
+    role: str,
+) -> User:
+    """Create and persist a new user record. Raises on constraint violation."""
+    user = User(
+        email=email,
+        full_name=full_name,
+        password_hash=password_hash,
+        role=role,
+        is_active=True,
+    )
+    db.add(user)
+    await db.commit()
+    await db.refresh(user)
+    return user
+
+
+async def update_password(
+    db: AsyncSession, user_id: uuid.UUID, new_hash: str
+) -> None:
+    """Replace a user's password hash in-place."""
+    await db.execute(
+        update(User)
+        .where(User.id == user_id)
+        .values(password_hash=new_hash, updated_at=datetime.now(UTC))
+    )
+    await db.commit()
+
+
+async def revoke_all_sessions(db: AsyncSession, user_id: uuid.UUID) -> None:
+    """Revoke every active session for a user (called after password reset)."""
+    await db.execute(
+        update(Session)
+        .where(Session.user_id == user_id, Session.revoked_at.is_(None))
+        .values(revoked_at=datetime.now(UTC))
+    )
+    await db.commit()
