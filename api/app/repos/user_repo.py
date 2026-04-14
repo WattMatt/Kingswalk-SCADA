@@ -170,3 +170,23 @@ async def revoke_all_sessions(db: AsyncSession, user_id: uuid.UUID) -> None:
         .values(revoked_at=datetime.now(UTC))
     )
     await db.commit()
+
+
+async def stage_update_password(
+    db: AsyncSession, user_id: uuid.UUID, new_hash: str
+) -> None:
+    """Execute password update SQL without committing."""
+    await db.execute(
+        update(User)
+        .where(User.id == user_id)
+        .values(password_hash=new_hash, updated_at=datetime.now(UTC))
+    )
+
+
+async def stage_revoke_all_sessions(db: AsyncSession, user_id: uuid.UUID) -> None:
+    """Execute session revocation SQL without committing."""
+    await db.execute(
+        update(Session)
+        .where(Session.user_id == user_id, Session.revoked_at.is_(None))
+        .values(revoked_at=datetime.now(UTC))
+    )

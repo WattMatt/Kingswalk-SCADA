@@ -19,17 +19,21 @@ async def _check_rate_limit(email: str, ip: str | None) -> None:
     redis = await get_redis()
 
     email_key = f"pwd_reset:email:{email}"
-    count = await redis.incr(email_key)
-    if count == 1:
-        await redis.expire(email_key, _RATE_WINDOW)
+    pipe = redis.pipeline()
+    pipe.incr(email_key)
+    pipe.expire(email_key, _RATE_WINDOW)
+    results = await pipe.execute()
+    count: int = results[0]
     if count > _EMAIL_RATE_LIMIT:
         raise AuthError("Too many password reset requests. Try again later.")
 
     if ip:
         ip_key = f"pwd_reset:ip:{ip}"
-        ip_count = await redis.incr(ip_key)
-        if ip_count == 1:
-            await redis.expire(ip_key, _RATE_WINDOW)
+        ip_pipe = redis.pipeline()
+        ip_pipe.incr(ip_key)
+        ip_pipe.expire(ip_key, _RATE_WINDOW)
+        ip_results = await ip_pipe.execute()
+        ip_count: int = ip_results[0]
         if ip_count > _IP_RATE_LIMIT:
             raise AuthError("Too many requests from this IP. Try again later.")
 
@@ -58,7 +62,7 @@ async def request_reset(db: AsyncSession, email: str, ip: str | None) -> None:
 
 
 async def confirm_reset(db: AsyncSession, raw_token: str, new_password: str) -> None:
-    """Verify token, change password, revoke all sessions."""
+    """Verify token, change password, revoke all sessions — atomic commit."""
     reset = await password_reset_repo.get_valid_reset(db, raw_token)
     if reset is None:
         raise AuthError("Invalid or expired reset token")
@@ -68,9 +72,11 @@ async def confirm_reset(db: AsyncSession, raw_token: str, new_password: str) -> 
         raise AuthError("User not found")
 
     new_hash = hash_password(new_password)
-    await user_repo.update_password(db, user.id, new_hash)
-    await password_reset_repo.consume_reset(db, reset)
-    await user_repo.revoke_all_sessions(db, user.id)
+    await user_repo.stage_update_password(db, user.id, new_hash)
+    password_reset_repo.stage_consume_reset(reset)
+    await user_repo.stage_revoke_all_sessions(db, user.id)
+    await db.commit()
+
     await user_repo.write_audit(
         db, action="auth.password_reset_confirmed", user_id=user.id
     )

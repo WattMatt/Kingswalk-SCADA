@@ -134,3 +134,38 @@ async def test_invalid_reset_token_rejected(http_client, clean_tables, fake_redi
         json={"token": "notarealtoken", "password": "anything"},
     )
     assert resp.status_code == 401
+
+
+async def test_reset_revokes_existing_sessions(
+    http_client, operator_user, fake_redis, monkeypatch
+):
+    """Sessions issued before reset must be invalidated after reset completes."""
+    tokens: list[str] = []
+
+    async def capture_token(db, email, raw_token):  # noqa: ARG001
+        tokens.append(raw_token)
+
+    monkeypatch.setattr(prs, "_send_reset_email", capture_token)
+
+    # Log in to get a session cookie
+    login_resp = await http_client.post(
+        "/auth/login",
+        json={"email": operator_user["email"], "password": operator_user["password"]},
+    )
+    assert login_resp.status_code == 200
+
+    # Request + capture reset token
+    await http_client.post(
+        "/auth/password-reset/request", json={"email": operator_user["email"]}
+    )
+    token = tokens[0]
+
+    # Perform reset
+    await http_client.post(
+        "/auth/password-reset/confirm",
+        json={"token": token, "password": "NewSecurePass555!"},
+    )
+
+    # The refresh token from before the reset must now be rejected (session revoked in DB)
+    refresh_resp = await http_client.post("/auth/refresh")
+    assert refresh_resp.status_code == 401

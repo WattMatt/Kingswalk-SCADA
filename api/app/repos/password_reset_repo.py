@@ -1,5 +1,6 @@
 # api/app/repos/password_reset_repo.py
 import hashlib
+import uuid
 from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import select
@@ -9,7 +10,7 @@ from app.db.models import PasswordReset
 
 
 async def create_reset(
-    db: AsyncSession, user_id, raw_token: str
+    db: AsyncSession, user_id: uuid.UUID, raw_token: str
 ) -> PasswordReset:
     """Store a hashed reset token. raw_token is sent via email; hash goes in DB."""
     reset = PasswordReset(
@@ -42,3 +43,8 @@ async def consume_reset(db: AsyncSession, reset: PasswordReset) -> None:
     """Mark reset as used. Subsequent calls to get_valid_reset() will return None."""
     reset.used_at = datetime.now(UTC)
     await db.commit()
+
+
+def stage_consume_reset(reset: PasswordReset) -> None:
+    """Stage reset as consumed without committing. Call db.commit() after all staging."""
+    reset.used_at = datetime.now(UTC)
