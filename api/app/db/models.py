@@ -165,7 +165,9 @@ class RawSample(Base):
     __tablename__ = "raw_sample"
     __table_args__ = {"schema": "telemetry"}
 
-    ts: Mapped[datetime] = mapped_column(DateTime(timezone=True), primary_key=True)
+    ts: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), primary_key=True, server_default=func.now()
+    )
     device_id: Mapped[str] = mapped_column(Text, primary_key=True)
     register_address: Mapped[int] = mapped_column(Integer, primary_key=True)
     raw_value: Mapped[int] = mapped_column(Integer, nullable=False)

@@ -46,7 +46,9 @@ async def insert_raw_batch(db: AsyncSession, samples: list[RawSampleRow]) -> int
     )
     result = await db.execute(stmt)
     await db.commit()
-    inserted = result.rowcount if result.rowcount is not None else 0
+    # asyncpg returns -1 for rowcount when ON CONFLICT DO NOTHING skips all rows;
+    # guard against that to ensure we always return a non-negative count.
+    inserted = max(0, result.rowcount) if result.rowcount is not None else 0
     log.info("raw_batch_inserted", count=inserted, total=len(samples))
     return inserted
 
