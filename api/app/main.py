@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.exceptions import AppError, app_error_handler
 from app.core.logging import configure_logging
+from app.core.redis_client import close_redis
 from app.routes.admin import admin_router
 from app.routes.auth import router as auth_router
 from app.routes.health import router as health_router
@@ -23,6 +24,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Startup and shutdown lifecycle."""
     logger.info("startup", environment=settings.environment, version=settings.version)
     yield
+    await close_redis()
     logger.info("shutdown")
 
 

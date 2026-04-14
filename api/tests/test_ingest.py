@@ -79,3 +79,35 @@ async def test_ingest_no_edge_key_configured(client: AsyncClient, monkeypatch) -
         headers={"Authorization": "Bearer anything"},
     )
     assert resp.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_ingest_publishes_to_redis(
+    client: AsyncClient, clean_tables: None, fake_redis
+) -> None:
+    """After a successful batch ingest, a message is published to telemetry:live."""
+    import asyncio
+    import json
+
+    # Subscribe BEFORE posting the batch
+    pubsub = fake_redis.pubsub()
+    await pubsub.subscribe("telemetry:live")
+    # Drain the subscribe-confirmation message
+    await pubsub.get_message(ignore_subscribe_messages=True, timeout=0.1)
+
+    resp = await client.post(
+        "/api/ingest/batch",
+        json={"samples": [VALID_SAMPLE]},
+        headers={"Authorization": f"Bearer {EDGE_KEY}"},
+    )
+    assert resp.status_code == 200
+
+    # Allow event loop to flush the Redis publish
+    await asyncio.sleep(0.05)
+    msg = await pubsub.get_message(ignore_subscribe_messages=True, timeout=0.2)
+    await pubsub.unsubscribe("telemetry:live")
+    await pubsub.aclose()
+
+    assert msg is not None, "No message published to telemetry:live"
+    payload = json.loads(msg["data"])
+    assert payload["samples"][0]["device_id"] == "MB_1_1_breaker_0"
