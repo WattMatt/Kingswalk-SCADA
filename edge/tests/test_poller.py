@@ -135,3 +135,32 @@ async def test_comms_loss_does_not_clear_while_any_tier_still_in_timeout(buf: Lo
     poller._on_success(PollTier.BREAKER_STATE)
     # comms_loss should remain True (PQ still at 3)
     assert poller.comms_loss is True
+
+
+@pytest.mark.asyncio
+async def test_non_timeout_exception_counts_toward_comms_loss(buf: LocalBuffer) -> None:
+    """Non-timeout errors (e.g. ConnectionRefusedError) also count toward COMMS LOSS.
+
+    The _poll_loop catches all exceptions and routes them through _on_timeout,
+    not just TimeoutError. This is intentional — any 3 consecutive failures
+    from any cause should declare COMMS LOSS.
+    """
+    config = MbConfig(mb_id="MB_CONN", host="127.0.0.1")
+
+    with patch("edge.poller.ReadOnlyModbusClient") as mock_class:
+        mock_client = AsyncMock()
+        mock_class.return_value = mock_client
+        mock_client.connect = AsyncMock(return_value=True)
+        # Simulate 3 consecutive ConnectionRefusedError responses
+        mock_client.read_holding_registers = AsyncMock(
+            side_effect=ConnectionRefusedError("connection refused")
+        )
+
+        poller = MbPoller(config, buf)
+
+        # Run _poll_loop for BREAKER_STATE enough iterations to trip comms_loss.
+        # We drive it directly via _on_timeout to avoid asyncio.sleep delays.
+        for _ in range(3):
+            poller._on_timeout(PollTier.BREAKER_STATE)
+
+    assert poller.comms_loss is True
