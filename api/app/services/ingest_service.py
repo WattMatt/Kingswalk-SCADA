@@ -53,9 +53,11 @@ async def handle_batch(db: AsyncSession, samples: list[_SampleLike]) -> int:
 
     inserted = await telemetry_repo.insert_raw_batch(db, rows)
 
-    # Evaluate thresholds for every sample (not just new ones — idempotent insert
-    # means a re-sent sample won't have been stored again, but we still evaluate
-    # to ensure threshold rules are applied even on replay).
+    # Evaluate thresholds for every sample in the batch, not just newly inserted ones.
+    # Duplicate samples won't re-insert (ON CONFLICT DO NOTHING) but we still evaluate
+    # them on replay to catch threshold breaches that may have been missed while offline.
+    # threshold_service has its own 5-minute dedup guard, so re-evaluation of a
+    # recently seen sample will not produce a duplicate alarm event.
     for s in samples:
         try:
             await threshold_service.evaluate_sample(
@@ -83,7 +85,9 @@ async def handle_batch(db: AsyncSession, samples: list[_SampleLike]) -> int:
                     for s in samples
                 ]
             })
-            await redis.publish(_REDIS_CHANNEL, payload)
+            subscribers = await redis.publish(_REDIS_CHANNEL, payload)
+            if subscribers == 0:
+                log.warning("redis_no_subscribers", channel=_REDIS_CHANNEL)
         except Exception:
             # Redis publish failure must not abort the ingest response.
             log.exception("redis_publish_failed")
