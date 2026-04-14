@@ -40,6 +40,7 @@ describe("useAuthStore", () => {
     const state = useAuthStore.getState();
     expect(state.user).toBeNull();
     expect(state.isAuthenticated).toBe(false);
+    expect(state.isLoading).toBe(false);
   });
 
   it("setLoading updates the loading flag", () => {
