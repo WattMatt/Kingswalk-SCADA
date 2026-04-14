@@ -1,5 +1,6 @@
 """Tests for LocalBuffer — SQLite-backed telemetry sample buffer."""
 import pytest
+from collections.abc import AsyncGenerator
 from datetime import datetime, timezone
 
 from edge.buffer import LocalBuffer, RawSample
@@ -17,10 +18,11 @@ def _sample(device_id: str = "MB_1_1", register_address: int = 0, raw_value: int
 
 
 @pytest.fixture
-async def buf():
+async def buf() -> AsyncGenerator[LocalBuffer, None]:
     b = LocalBuffer(":memory:")
     await b.initialise()
-    return b
+    yield b
+    await b.close()
 
 
 @pytest.mark.asyncio

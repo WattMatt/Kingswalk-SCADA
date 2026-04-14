@@ -167,3 +167,9 @@ class LocalBuffer:
             ) as cursor:
                 row = await cursor.fetchone()
                 return int(row[0]) if row else 0
+
+    async def close(self) -> None:
+        """Close the persistent `:memory:` connection, if any."""
+        if self._db is not None:
+            await self._db.close()
+            self._db = None
