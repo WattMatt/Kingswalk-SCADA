@@ -1,0 +1,14 @@
+.git
+.github
+graphify-out
+web/node_modules
+web/dist
+api/.venv
+api/__pycache__
+api/tests
+api/.pytest_cache
+api/.mypy_cache
+**/*.pyc
+**/*.pyo
+docs
+spec
