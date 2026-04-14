@@ -88,11 +88,29 @@ jobs:
           cache-dependency-path: web/package-lock.json
       - run: npm ci
       - run: npx tsc --noEmit
+      - run: npm run lint
+
+  web-test:
+    name: Web — Tests
+    runs-on: ubuntu-latest
+    needs: web-lint-type
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npm test
 
   web-build:
     name: Web — Build
     runs-on: ubuntu-latest
-    needs: web-lint-type
+    needs: [web-lint-type, web-test]
     defaults:
       run:
         working-directory: web
