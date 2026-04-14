@@ -15,7 +15,7 @@ async def send_invite_email(to_email: str, invite_token: str) -> None:
         subject="You're invited to Kingswalk SCADA",
         html=(
             f"<p>You have been invited to access the Kingswalk SCADA monitoring system.</p>"
-            f"<p><a href='{invite_url}'>Accept invitation</a></p>"
+            f'<p><a href="{invite_url}">Accept invitation</a></p>'
             f"<p>This link expires in 48 hours.</p>"
         ),
     )
@@ -29,7 +29,7 @@ async def send_password_reset_email(to_email: str, reset_token: str) -> None:
         subject="Kingswalk SCADA — Password Reset",
         html=(
             f"<p>A password reset was requested for your account.</p>"
-            f"<p><a href='{reset_url}'>Reset password</a></p>"
+            f'<p><a href="{reset_url}">Reset password</a></p>'
             f"<p>This link expires in 1 hour. If you did not request this, ignore this email.</p>"
         ),
     )
