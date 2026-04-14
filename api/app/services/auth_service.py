@@ -3,6 +3,7 @@ import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import AuthError
+from app.core.redis_client import get_redis
 from app.core.security import (
     create_access_token,
     create_refresh_token,
@@ -19,6 +20,45 @@ _DUMMY_HASH = (
     "$AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
 )
 
+_LOCKOUT_ATTEMPTS = 5
+_LOCKOUT_WINDOW = 900  # 15 minutes in seconds
+
+
+async def _check_lockout(email: str, ip: str | None) -> None:
+    """Raise AuthError if account or IP is currently locked out."""
+    redis = await get_redis()
+    if await redis.exists(f"auth:lock:{email}"):
+        raise AuthError("Account temporarily locked. Try again later.")
+    if ip and await redis.exists(f"auth:lock:ip:{ip}"):
+        raise AuthError("Too many attempts from this IP. Try again later.")
+
+
+async def _record_failure(email: str, ip: str | None) -> None:
+    """Increment failure counters; set lock sentinel when threshold reached."""
+    redis = await get_redis()
+    pipe = redis.pipeline()
+    pipe.incr(f"auth:fail:{email}")
+    pipe.expire(f"auth:fail:{email}", _LOCKOUT_WINDOW)
+    if ip:
+        pipe.incr(f"auth:fail:ip:{ip}")
+        pipe.expire(f"auth:fail:ip:{ip}", _LOCKOUT_WINDOW)
+    results = await pipe.execute()
+
+    email_count: int = results[0]
+    if email_count >= _LOCKOUT_ATTEMPTS:
+        await redis.set(f"auth:lock:{email}", "1", ex=_LOCKOUT_WINDOW)
+
+    if ip:
+        ip_count: int = results[2]
+        if ip_count >= _LOCKOUT_ATTEMPTS:
+            await redis.set(f"auth:lock:ip:{ip}", "1", ex=_LOCKOUT_WINDOW)
+
+
+async def _clear_failure(email: str) -> None:
+    """Delete failure counter after a successful login."""
+    redis = await get_redis()
+    await redis.delete(f"auth:fail:{email}")
+
 
 async def authenticate(
     db: AsyncSession, email: str, password: str, ip: str | None
@@ -27,17 +67,22 @@ async def authenticate(
     Validate credentials. Raises AuthError on any failure.
 
     Always runs password verification (even for unknown email) to prevent
-    timing-based user enumeration.
+    timing-based user enumeration. Enforces per-account and per-IP lockout
+    via Redis (5 failures / 15 min window).
     """
+    await _check_lockout(email, ip)
+
     user = await user_repo.get_user_by_email(db, email)
     candidate_hash = user.password_hash if user else _DUMMY_HASH
 
     password_ok = verify_password(password, candidate_hash)
 
     if not password_ok or user is None or not user.is_active:
+        await _record_failure(email, ip)
         await user_repo.write_audit(db, action="auth.login_failed", ip=ip)
         raise AuthError("Invalid email or password")
 
+    await _clear_failure(email)
     return user
 
 

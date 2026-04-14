@@ -2,11 +2,13 @@ import os
 from collections.abc import AsyncGenerator
 from urllib.parse import parse_qs, urlparse
 
+import fakeredis.aioredis
 import pyotp
 import pytest
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
+from app.core import redis_client as rc
 from app.core.security import hash_password
 from app.db.engine import get_db
 from app.db.models import User
@@ -92,6 +94,17 @@ async def operator_user(clean_tables: None) -> dict:  # noqa: ARG001
 @pytest.fixture
 async def admin_user(clean_tables: None) -> dict:  # noqa: ARG001
     return await _seed_user("admin@test.scada", "AdminPass456!", role="admin")
+
+
+@pytest.fixture(autouse=True)
+async def fake_redis():
+    """Fresh in-memory Redis per test — prevents real Redis dependency in all tests."""
+    server = fakeredis.FakeServer()
+    r = fakeredis.aioredis.FakeRedis(server=server, decode_responses=True)
+    rc._redis = r
+    yield r
+    await r.aclose()
+    rc._redis = None
 
 
 @pytest.fixture
