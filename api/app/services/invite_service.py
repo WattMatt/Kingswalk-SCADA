@@ -15,16 +15,14 @@ async def create_invite(
     """
     Create an invite record and dispatch the invite email.
 
-    1. Generate invite_id before the JWT (so the ID can be embedded in the token).
-    2. Create JWT — the raw token is the JWT string itself.
-    3. Store SHA-256(raw_token) in DB for revocation.
-    4. Send email with raw token in the link.
+    Stages the DB row, sends the email (raises on failure — nothing commits),
+    then commits. This ensures no orphaned rows if email delivery fails.
     """
     invite_id = uuid.uuid4()
     raw_token = create_invite_token(
         invite_id=str(invite_id), email=email, role=role
     )
-    await invite_repo.create_invite_with_id(
+    invite_repo.stage_invite_with_id(
         db,
         invite_id=invite_id,
         email=email,
@@ -33,3 +31,4 @@ async def create_invite(
         raw_token=raw_token,
     )
     await email_client.send_invite_email(email, raw_token)
+    await db.commit()

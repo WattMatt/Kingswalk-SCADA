@@ -11,6 +11,33 @@ from app.core.security import INVITE_TOKEN_TTL_SECONDS
 from app.db.models import Invite
 
 
+def stage_invite_with_id(
+    db: AsyncSession,
+    *,
+    invite_id: uuid.UUID,
+    email: str,
+    role: str,
+    invited_by: uuid.UUID | None,
+    raw_token: str,
+) -> Invite:
+    """
+    Stage an invite for insertion without committing.
+
+    Use this in service-layer code that controls the transaction boundary.
+    Call db.commit() after the email is successfully sent.
+    """
+    invite = Invite(
+        id=invite_id,
+        email=email,
+        role=role,
+        token_hash=hashlib.sha256(raw_token.encode()).hexdigest(),
+        invited_by=invited_by,
+        expires_at=datetime.now(UTC) + timedelta(seconds=INVITE_TOKEN_TTL_SECONDS),
+    )
+    db.add(invite)
+    return invite
+
+
 async def create_invite_with_id(
     db: AsyncSession,
     *,
