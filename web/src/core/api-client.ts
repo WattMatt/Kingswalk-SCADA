@@ -1,5 +1,5 @@
 // web/src/core/api-client.ts
-import type { MfaConfirmResponse, MfaEnrollResponse, User } from "./types";
+import type { MfaConfirmResponse, MfaEnrollResponse, User, UserRole } from "./types";
 
 const BASE_URL = "/api";
 
@@ -85,7 +85,7 @@ export const apiClient = {
   },
 
   admin: {
-    invite: (email: string, role: string) =>
+    invite: (email: string, role: UserRole) =>
       request<{ message: string }>("/admin/invite", {
         method: "POST",
         body: JSON.stringify({ email, role }),
