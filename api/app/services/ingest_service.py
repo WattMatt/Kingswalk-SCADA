@@ -2,7 +2,8 @@
 """Ingest orchestration: store → evaluate → publish."""
 from __future__ import annotations
 
-from typing import Any
+from datetime import datetime
+from typing import Protocol
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -10,7 +11,16 @@ from app.repos import telemetry_repo
 from app.repos.telemetry_repo import RawSampleRow
 
 
-async def handle_batch(db: AsyncSession, samples: list[Any]) -> int:
+class _SampleLike(Protocol):
+    """Structural type for ingest samples — avoids circular import with routes/ingest.py."""
+
+    device_id: str
+    register_address: int
+    raw_value: int
+    sampled_at: datetime
+
+
+async def handle_batch(db: AsyncSession, samples: list[_SampleLike]) -> int:
     """Store raw samples. Returns count of newly inserted rows.
 
     Threshold evaluation and Redis publish are wired in Task 4.
