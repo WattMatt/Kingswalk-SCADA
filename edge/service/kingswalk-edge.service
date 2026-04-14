@@ -1,0 +1,34 @@
+[Unit]
+Description=Kingswalk SCADA Edge Gateway
+Documentation=https://github.com/WattMatt/Kingswalk-SCADA
+After=network-online.target wireguard.target
+Wants=network-online.target
+
+[Service]
+Type=notify
+User=scada
+Group=scada
+WorkingDirectory=/opt/kingswalk-edge
+ExecStart=/opt/kingswalk-edge/.venv/bin/python -m edge.main
+Restart=always
+RestartSec=5
+TimeoutStartSec=30
+WatchdogSec=30
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=kingswalk-edge
+
+# Environment
+Environment=PYTHONUNBUFFERED=1
+EnvironmentFile=/etc/kingswalk-edge/edge.env
+
+# Security hardening
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/var/lib/kingswalk-edge
+
+[Install]
+WantedBy=multi-user.target
