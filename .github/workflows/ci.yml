@@ -98,6 +98,27 @@ jobs:
       - name: Static security analysis
         run: bandit -r app -ll
 
+  edge-security:
+    name: Edge — No Write Codes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify no Modbus write function codes in edge/
+        run: |
+          # Grep for actual write CALLS (trailing paren) or literal FC06/FC16.
+          # Excludes modbus_client.py (the wrapper that defines the block list)
+          # and its test file (which references the method names as strings).
+          HITS=$(grep -rn \
+            "write_register(\|write_registers(\|write_coil(\|write_coils(\|readwrite_registers(\|mask_write_register(\|FC06\|FC16" \
+            edge/ 2>/dev/null \
+            | grep -v "edge/modbus_client.py\|edge/tests/test_modbus_client.py" || true)
+          if [ -n "$HITS" ]; then
+            echo "ERROR: Forbidden Modbus write operation found in edge/:"
+            echo "$HITS"
+            exit 1
+          fi
+          echo "OK: No write operations found in edge/"
+
   web-lint-type:
     name: Web — Lint & Type Check
     runs-on: ubuntu-latest
