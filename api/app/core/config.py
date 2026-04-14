@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     resend_api_key: str = ""  # Empty = skip email sending (dev mode)
     app_url: str = "http://localhost:5173"
     version: str = "0.1.0"
+    edge_api_key: str = ""  # Empty = reject all edge ingest requests; set in production
 
 
 settings = Settings()  # type: ignore[call-arg]

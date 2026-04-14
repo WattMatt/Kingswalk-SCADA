@@ -55,6 +55,7 @@ jobs:
       TEST_DB_URL: "postgresql+asyncpg://scada:scada_dev@localhost:5432/kingswalk_scada_test"
       # Fallback is a valid base64-encoded 32-byte key — safe for CI, never for production
       MFA_ENCRYPTION_KEY: ${{ secrets.MFA_ENCRYPTION_KEY || 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=' }}
+      EDGE_API_KEY: "test-edge-api-key-for-ci-only"
     steps:
       - name: Inject secrets from Doppler
         if: ${{ env.DOPPLER_TOKEN != '' }}
@@ -77,6 +78,8 @@ jobs:
             -f ../db/migrations/0001a_schema_review_fixes.sql
           PGPASSWORD=scada_dev psql -h localhost -U scada -d kingswalk_scada_test \
             -f ../db/migrations/0002_canvas_layers.sql
+          PGPASSWORD=scada_dev psql -h localhost -U scada -d kingswalk_scada_test \
+            -f ../db/migrations/0003_raw_sample.sql
       - name: Run full test suite
         run: pytest tests/ -v --tb=short
 
