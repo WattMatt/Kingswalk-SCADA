@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Text, func
+from sqlalchemy import BigInteger, Boolean, DateTime, Enum, Float, ForeignKey, Integer, Text, func
 from sqlalchemy.dialects.postgresql import INET, JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -150,6 +150,72 @@ class PasswordReset(Base):
     token_hash: Mapped[str] = mapped_column(Text, nullable=False)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+
+class RawSample(Base):
+    """Staging table for raw edge telemetry — no FK to asset tables (Phase 2b).
+
+    Primary key: (device_id, register_address, ts) — matches the hypertable
+    partition key and the ON CONFLICT constraint for idempotent inserts.
+    """
+
+    __tablename__ = "raw_sample"
+    __table_args__ = {"schema": "telemetry"}
+
+    ts: Mapped[datetime] = mapped_column(DateTime(timezone=True), primary_key=True)
+    device_id: Mapped[str] = mapped_column(Text, primary_key=True)
+    register_address: Mapped[int] = mapped_column(Integer, primary_key=True)
+    raw_value: Mapped[int] = mapped_column(Integer, nullable=False)
+
+
+class Event(Base):
+    """Alarm/event record — matches events.event."""
+
+    __tablename__ = "event"
+    __table_args__ = {"schema": "events"}
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    ts: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    asset_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
+    severity: Mapped[str] = mapped_column(
+        Enum("info", "warning", "error", "critical",
+             name="severity", schema="events", create_type=False),
+        nullable=False,
+    )
+    kind: Mapped[str] = mapped_column(Text, nullable=False)
+    message: Mapped[str] = mapped_column(Text, nullable=False)
+    payload: Mapped[dict[str, object]] = mapped_column(JSONB, nullable=False, default=dict)
+    acknowledged_by: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
+    acknowledged_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+
+
+class Threshold(Base):
+    """Threshold rule for event generation — matches events.threshold."""
+
+    __tablename__ = "threshold"
+    __table_args__ = {"schema": "events"}
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    asset_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
+    asset_class: Mapped[str | None] = mapped_column(Text, nullable=True)
+    metric: Mapped[str] = mapped_column(Text, nullable=False)
+    op: Mapped[str] = mapped_column(Text, nullable=False)  # '<','<=','>','>=','==','!='
+    value: Mapped[float] = mapped_column(Float, nullable=False)
+    hysteresis: Mapped[float] = mapped_column(Float, nullable=False, default=0)
+    severity: Mapped[str] = mapped_column(
+        Enum("info", "warning", "error", "critical",
+             name="severity", schema="events", create_type=False),
+        nullable=False,
+        default="warning",
+    )
+    enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
