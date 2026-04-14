@@ -1,21 +1,8 @@
 # api/tests/test_login_lockout.py
-import fakeredis.aioredis
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-from app.core import redis_client as rc
 from app.main import app
-
-
-@pytest.fixture(autouse=True)
-async def fake_redis_lockout():
-    """Inject a fresh in-memory Redis for every test in this module."""
-    server = fakeredis.FakeServer()
-    r = fakeredis.aioredis.FakeRedis(server=server, decode_responses=True)
-    rc._redis = r
-    yield r
-    await r.aclose()
-    rc._redis = None
 
 
 @pytest.fixture
@@ -59,7 +46,7 @@ async def test_four_failures_still_allows_login(http_client, operator_user):
     assert r.json() == {"message": "Login successful"}
 
 
-async def test_successful_login_clears_failure_counter(http_client, operator_user, fake_redis_lockout):
+async def test_successful_login_clears_failure_counter(http_client, operator_user, fake_redis):
     """After a successful login, the failure counter is deleted (not just decremented)."""
     for _ in range(3):
         await http_client.post(
@@ -73,10 +60,10 @@ async def test_successful_login_clears_failure_counter(http_client, operator_use
     )
 
     key = f"auth:fail:{operator_user['email']}"
-    assert await fake_redis_lockout.exists(key) == 0
+    assert await fake_redis.exists(key) == 0
 
 
-async def test_unknown_email_also_increments_counter(http_client, clean_tables, fake_redis_lockout):
+async def test_unknown_email_also_increments_counter(http_client, clean_tables, fake_redis):
     """Login failure for unknown email must still increment failure counter (timing normalised)."""
     for _ in range(5):
         await http_client.post(

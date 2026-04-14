@@ -44,20 +44,28 @@ async def _record_failure(email: str, ip: str | None) -> None:
         pipe.expire(f"auth:fail:ip:{ip}", _LOCKOUT_WINDOW)
     results = await pipe.execute()
 
-    email_count: int = results[0]
+    # NOTE: There is a narrow race window between pipe.execute() and the sentinel SET below.
+    # A concurrent request can pass _check_lockout before the sentinel is written.
+    # For this threat model (rate-limiting, not hard security boundary) this is acceptable.
+    # If a hard guarantee is required, replace with a Lua script.
+    email_count: int = results[0]  # result of incr(auth:fail:{email})
+    # results[1] is expire() return — not needed
     if email_count >= _LOCKOUT_ATTEMPTS:
         await redis.set(f"auth:lock:{email}", "1", ex=_LOCKOUT_WINDOW)
 
     if ip:
-        ip_count: int = results[2]
+        ip_count: int = results[2]  # result of incr(auth:fail:ip:{ip}); only present when ip is truthy
         if ip_count >= _LOCKOUT_ATTEMPTS:
             await redis.set(f"auth:lock:ip:{ip}", "1", ex=_LOCKOUT_WINDOW)
 
 
-async def _clear_failure(email: str) -> None:
-    """Delete failure counter after a successful login."""
+async def _clear_failure(email: str, ip: str | None) -> None:
+    """Delete failure counters after a successful login (email and IP)."""
     redis = await get_redis()
-    await redis.delete(f"auth:fail:{email}")
+    keys = [f"auth:fail:{email}"]
+    if ip:
+        keys.append(f"auth:fail:ip:{ip}")
+    await redis.delete(*keys)
 
 
 async def authenticate(
@@ -82,7 +90,7 @@ async def authenticate(
         await user_repo.write_audit(db, action="auth.login_failed", ip=ip)
         raise AuthError("Invalid email or password")
 
-    await _clear_failure(email)
+    await _clear_failure(email, ip)
     return user
 
 
