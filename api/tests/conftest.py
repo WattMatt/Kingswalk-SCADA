@@ -52,7 +52,9 @@ async def clean_tables() -> None:
     async with engine.begin() as conn:
         await conn.execute(
             sqlalchemy.text(
-                "TRUNCATE core.users, core.session, core.audit_log RESTART IDENTITY CASCADE"
+                "TRUNCATE core.users, core.session, core.audit_log, "
+                "core.invite, core.password_reset, core.recovery_code "
+                "RESTART IDENTITY CASCADE"
             )
         )
     await engine.dispose()

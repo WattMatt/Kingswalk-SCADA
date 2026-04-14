@@ -100,6 +100,30 @@ def decode_token(token: str, expected_aud: str) -> dict[str, object]:
     )
 
 
+def create_invite_token(invite_id: str, email: str, role: str) -> str:
+    """Create a 48-hour invite JWT (aud: invite).
+
+    The raw JWT string is stored SHA-256 hashed in the DB (token_hash column)
+    to allow revocation lookup without storing the plaintext token.
+    """
+    return _make_token(
+        {"sub": invite_id, "email": email, "role": role, "aud": "invite"},
+        ttl_seconds=172800,  # 48 hours
+    )
+
+
+def decode_invite_token(token: str) -> dict[str, object]:
+    """Decode and validate an invite JWT. Raises jwt.PyJWTError on any failure."""
+    return jwt.decode(
+        token,
+        settings.jwt_secret,
+        algorithms=["HS256"],
+        audience="invite",
+        issuer=settings.jwt_issuer,
+        options={"require": ["exp", "iss", "aud", "iat", "sub"]},
+    )
+
+
 def generate_csrf_token() -> str:
     """Generate a cryptographically secure 32-byte CSRF token (64 hex chars)."""
     return secrets.token_hex(32)
