@@ -17,7 +17,7 @@ from app.core.security import (
 from app.db.engine import get_db
 from app.db.models import User
 from app.repos import invite_repo, user_repo
-from app.services import auth_service
+from app.services import auth_service, password_reset_service
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -34,6 +34,15 @@ class OnboardRequest(BaseModel):
 
     token: str
     full_name: str
+    password: str
+
+
+class PasswordResetRequestBody(BaseModel):
+    email: EmailStr
+
+
+class PasswordResetConfirmBody(BaseModel):
+    token: str
     password: str
 
 
@@ -165,6 +174,28 @@ async def onboard(
         "message": "Account created",
         "mfa_required": user.role in ("admin", "operator"),
     }
+
+
+@router.post("/password-reset/request")
+async def password_reset_request(
+    body: PasswordResetRequestBody,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+) -> dict[str, str]:
+    """Always returns 200 — never reveals whether the email is registered."""
+    ip = request.client.host if request.client else None
+    await password_reset_service.request_reset(db, body.email, ip)
+    return {"message": "If that email is registered, a reset link has been sent"}
+
+
+@router.post("/password-reset/confirm")
+async def password_reset_confirm(
+    body: PasswordResetConfirmBody,
+    db: AsyncSession = Depends(get_db),
+) -> dict[str, str]:
+    """Verify reset token and apply new password. Revokes all active sessions."""
+    await password_reset_service.confirm_reset(db, body.token, body.password)
+    return {"message": "Password updated. Please log in again."}
 
 
 @router.get("/me")
