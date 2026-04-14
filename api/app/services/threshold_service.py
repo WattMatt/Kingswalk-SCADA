@@ -39,8 +39,8 @@ _BANDS: list[tuple[str, str, str]] = [
 def _triggered_severity(threshold: Threshold, value: float) -> str | None:
     """Return the highest severity band fired by *value*, or None if within all bands."""
     for severity, low_attr, high_attr in _BANDS:
-        low: float | None = getattr(threshold, low_attr)
-        high: float | None = getattr(threshold, high_attr)
+        low: float | None = getattr(threshold, low_attr, None)
+        high: float | None = getattr(threshold, high_attr, None)
         if low is not None and value < low:
             return severity
         if high is not None and value > high:
@@ -94,7 +94,7 @@ async def evaluate_sample(
                 "device_id": device_id,
                 "register_address": register_address,
                 "raw_value": raw_value,
-                "threshold_id": str(threshold.id),
+                "threshold_id": str(threshold.id) if threshold.id else None,
             },
         )
         created += 1
