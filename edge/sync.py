@@ -13,6 +13,7 @@ log = structlog.get_logger()
 
 _BATCH_SIZE = 500
 _BATCH_DELAY_S = 0.1   # 100ms between batches — avoids overwhelming TimescaleDB
+_IDLE_DELAY_S = 1.0    # sleep when buffer is empty — avoids tight spin
 _RETRY_DELAY_S = 5.0   # wait after a network error before retrying
 
 
@@ -41,7 +42,7 @@ class CloudSync:
     async def _flush_one_batch(self, client: httpx.AsyncClient) -> None:
         batch = await self._buffer.take_batch(max_rows=_BATCH_SIZE)
         if not batch:
-            await asyncio.sleep(1.0)
+            await asyncio.sleep(_IDLE_DELAY_S)
             return
 
         ids = [row[0] for row in batch]
