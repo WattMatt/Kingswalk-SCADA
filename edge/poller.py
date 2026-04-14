@@ -88,6 +88,11 @@ class MbPoller:
     def _on_success(self, tier: PollTier) -> None:
         self._consecutive_timeouts[tier] = 0
         self._last_poll = datetime.now(timezone.utc)
+        # Clear comms_loss once ALL tiers have successfully polled at least once
+        # since the last timeout cascade.
+        if self._comms_loss and all(v == 0 for v in self._consecutive_timeouts.values()):
+            log.info("comms_restored", mb=self._config.mb_id)
+            self._comms_loss = False
 
     # ─── Entry point ───────────────────────────────────────────────────────────
 
@@ -116,6 +121,7 @@ class MbPoller:
                 self._on_timeout(tier)
                 log.warning("poll_timeout", mb=self._config.mb_id, tier=tier.name)
             except Exception:
+                self._on_timeout(tier)
                 log.exception("poll_error", mb=self._config.mb_id, tier=tier.name)
             await asyncio.sleep(interval_s)
 

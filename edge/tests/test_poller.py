@@ -1,6 +1,7 @@
 """Tests for MbPoller — priority tiers, COMMS LOSS detection, buffer writes."""
 import asyncio
 import pytest
+from collections.abc import AsyncGenerator
 from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -9,10 +10,11 @@ from edge.poller import MbConfig, MbPoller, PollTier
 
 
 @pytest.fixture
-async def buf() -> LocalBuffer:
+async def buf() -> AsyncGenerator[LocalBuffer, None]:
     b = LocalBuffer(":memory:")
     await b.initialise()
-    return b
+    yield b
+    await b.close()
 
 
 def _make_poller(buf: LocalBuffer, host: str = "127.0.0.1") -> MbPoller:
@@ -105,3 +107,31 @@ async def test_poll_tier_intervals() -> None:
     assert PollTier.THD == 5000
     assert PollTier.ENERGY == 30000
     assert PollTier.COUNTER == 60000
+
+
+@pytest.mark.asyncio
+async def test_comms_loss_clears_after_all_tiers_recover(buf: LocalBuffer) -> None:
+    poller = _make_poller(buf)
+    # Trip comms_loss on BREAKER_STATE
+    for _ in range(3):
+        poller._on_timeout(PollTier.BREAKER_STATE)
+    assert poller.comms_loss is True
+    # Recover all tiers (one success per tier clears the counter)
+    for tier in PollTier:
+        poller._on_success(tier)
+    assert poller.comms_loss is False
+
+
+@pytest.mark.asyncio
+async def test_comms_loss_does_not_clear_while_any_tier_still_in_timeout(buf: LocalBuffer) -> None:
+    poller = _make_poller(buf)
+    # Trip two tiers
+    for _ in range(3):
+        poller._on_timeout(PollTier.BREAKER_STATE)
+    for _ in range(3):
+        poller._on_timeout(PollTier.PQ)
+    assert poller.comms_loss is True
+    # Only recover BREAKER_STATE
+    poller._on_success(PollTier.BREAKER_STATE)
+    # comms_loss should remain True (PQ still at 3)
+    assert poller.comms_loss is True
