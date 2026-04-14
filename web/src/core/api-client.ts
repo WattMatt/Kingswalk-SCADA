@@ -47,6 +47,24 @@ export const apiClient = {
 
   me: () => request<User>("/auth/me"),
 
+  onboard: (token: string, full_name: string, password: string) =>
+    request<{ message: string; mfa_required: boolean }>("/auth/onboard", {
+      method: "POST",
+      body: JSON.stringify({ token, full_name, password }),
+    }),
+
+  forgotPassword: (email: string) =>
+    request<{ message: string }>("/auth/password-reset/request", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    }),
+
+  resetPassword: (token: string, password: string) =>
+    request<{ message: string }>("/auth/password-reset/confirm", {
+      method: "POST",
+      body: JSON.stringify({ token, password }),
+    }),
+
   mfa: {
     enroll: () => request<MfaEnrollResponse>("/auth/mfa/enroll", { method: "POST" }),
     confirmEnrollment: (code: string) =>
@@ -63,6 +81,14 @@ export const apiClient = {
       request<{ message: string }>("/auth/mfa/recovery", {
         method: "POST",
         body: JSON.stringify({ code }),
+      }),
+  },
+
+  admin: {
+    invite: (email: string, role: string) =>
+      request<{ message: string }>("/admin/invite", {
+        method: "POST",
+        body: JSON.stringify({ email, role }),
       }),
   },
 };

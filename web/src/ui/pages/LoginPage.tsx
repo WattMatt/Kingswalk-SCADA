@@ -1,6 +1,6 @@
 // web/src/ui/pages/LoginPage.tsx
 import { useState, type FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { apiClient } from "@/core/api-client";
 import { useAuthStore } from "@/core/auth-store";
 
@@ -85,6 +85,12 @@ export function LoginPage() {
             {loading ? "Signing in…" : "Sign in"}
           </button>
         </form>
+        <Link
+          to="/forgot-password"
+          className="mt-3 block text-center text-sm text-slate-500 hover:text-slate-400"
+        >
+          Forgot password?
+        </Link>
       </div>
     </div>
   );
