@@ -199,25 +199,33 @@ class Event(Base):
 
 
 class Threshold(Base):
-    """Threshold rule for event generation — matches events.threshold."""
+    """Threshold rule for event generation — matches events.threshold (0001a multi-band schema).
+
+    Each row defines up to three severity bands (warning / error / critical), each with an
+    optional low and high boundary. A value fires that severity if it falls outside the
+    [low, high] range (either boundary can be None to mean "unbounded").
+    """
 
     __tablename__ = "threshold"
     __table_args__ = {"schema": "events"}
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
     asset_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
     asset_class: Mapped[str | None] = mapped_column(Text, nullable=True)
     metric: Mapped[str] = mapped_column(Text, nullable=False)
-    op: Mapped[str] = mapped_column(Text, nullable=False)  # '<','<=','>','>=','==','!='
-    value: Mapped[float] = mapped_column(Float, nullable=False)
+    warning_low: Mapped[float | None] = mapped_column(Float, nullable=True)
+    warning_high: Mapped[float | None] = mapped_column(Float, nullable=True)
+    error_low: Mapped[float | None] = mapped_column(Float, nullable=True)
+    error_high: Mapped[float | None] = mapped_column(Float, nullable=True)
+    critical_low: Mapped[float | None] = mapped_column(Float, nullable=True)
+    critical_high: Mapped[float | None] = mapped_column(Float, nullable=True)
     hysteresis: Mapped[float] = mapped_column(Float, nullable=False, default=0)
-    severity: Mapped[str] = mapped_column(
-        Enum("info", "warning", "error", "critical",
-             name="severity", schema="events", create_type=False),
-        nullable=False,
-        default="warning",
-    )
     enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
