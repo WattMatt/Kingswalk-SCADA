@@ -12,3 +12,5 @@ api/.mypy_cache
 **/*.pyo
 docs
 spec
+ADR
+edge
