@@ -35,17 +35,17 @@ class ReadOnlyModbusClient:
         self._host = host
         self._port = port
         self._timeout = timeout
+        # Always set __client before the try so __getattr__ never recurses if
+        # an unexpected exception (OSError, ImportError, etc.) fires mid-__init__.
+        self.__client: AsyncModbusTcpClient | None = None
         # Attempt eager construction. pymodbus >= 3.7 calls asyncio.get_running_loop()
         # in __init__, which fails outside an event loop. In that case we defer to
         # first use inside an async context. Under test patches the mock constructor
         # succeeds synchronously.
         try:
-            self.__client: AsyncModbusTcpClient | None = AsyncModbusTcpClient(
-                host, port=port, timeout=timeout
-            )
+            self.__client = AsyncModbusTcpClient(host, port=port, timeout=timeout)
         except RuntimeError:
-            # No running event loop — defer construction until we are inside one.
-            self.__client = None
+            pass  # No running event loop — defer construction until we are inside one.
 
     def _get_client(self) -> AsyncModbusTcpClient:
         if self.__client is None:
