@@ -19,6 +19,8 @@ class Settings(BaseSettings):
     environment: str = "development"
     log_level: str = "info"
     cors_origins: list[str] = ["http://localhost:5173"]
+    resend_api_key: str = ""  # Empty = skip email sending (dev mode)
+    app_url: str = "http://localhost:5173"
     version: str = "0.1.0"
 
 
