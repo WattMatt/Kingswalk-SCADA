@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Text, func
+from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Integer, Text, func
 from sqlalchemy.dialects.postgresql import INET, JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -153,3 +153,71 @@ class PasswordReset(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
+
+
+class MainBoard(Base):
+    """Electrical main board — matches assets.main_board."""
+
+    __tablename__ = "main_board"
+    __table_args__ = {"schema": "assets"}
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    code: Mapped[str] = mapped_column(Text, unique=True, nullable=False)
+    drawing: Mapped[str] = mapped_column(Text, nullable=False)
+    vlan_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    location: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    breakers: Mapped[list["Breaker"]] = relationship("Breaker", back_populates="main_board")
+
+
+class Breaker(Base):
+    """Circuit breaker asset — matches assets.breaker."""
+
+    __tablename__ = "breaker"
+    __table_args__ = {"schema": "assets"}
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    main_board_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("assets.main_board.id"), nullable=False
+    )
+    label: Mapped[str] = mapped_column(Text, nullable=False)
+    breaker_code: Mapped[str] = mapped_column(Text, nullable=False)
+    abb_family: Mapped[str] = mapped_column(Text, nullable=False)
+    rating_amp: Mapped[int] = mapped_column(Integer, nullable=False)
+    poles: Mapped[str] = mapped_column(Text, nullable=False)
+    essential_supply: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    main_board: Mapped["MainBoard"] = relationship("MainBoard", back_populates="breakers")
+
+
+class BreakerState(Base):
+    """Breaker state hypertable row — matches telemetry.breaker_state."""
+
+    __tablename__ = "breaker_state"
+    __table_args__ = {"schema": "telemetry"}
+
+    ts: Mapped[datetime] = mapped_column(DateTime(timezone=True), primary_key=True)
+    breaker_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("assets.breaker.id"), primary_key=True, nullable=False
+    )
+    state: Mapped[str] = mapped_column(Text, nullable=False)
+    trip_cause: Mapped[str | None] = mapped_column(Text, nullable=True)
+    contact_source: Mapped[str | None] = mapped_column(Text, nullable=True)

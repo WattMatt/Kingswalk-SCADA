@@ -11,7 +11,9 @@ from app.core.logging import configure_logging
 from app.routes.admin import admin_router
 from app.routes.auth import router as auth_router
 from app.routes.health import router as health_router
+from app.routes.ingest import router as ingest_router
 from app.routes.mfa import router as mfa_router
+from app.routes.ws import router as ws_router
 
 configure_logging(settings.log_level)
 logger = structlog.get_logger()
@@ -62,6 +64,8 @@ def create_app() -> FastAPI:
     app.include_router(auth_router)
     app.include_router(mfa_router)
     app.include_router(admin_router)
+    app.include_router(ingest_router, prefix="/api/ingest")
+    app.include_router(ws_router, prefix="/api")
 
     return app
 

@@ -22,6 +22,9 @@ class Settings(BaseSettings):
     resend_api_key: str = ""  # Empty = skip email sending (dev mode)
     app_url: str = "http://localhost:5173"
     version: str = "0.1.0"
+    # Static bearer token used by the edge gateway for telemetry ingest.
+    # Generate: python -c "import secrets; print(secrets.token_hex(32))"
+    edge_ingest_token: str
 
 
 settings = Settings()  # type: ignore[call-arg]
