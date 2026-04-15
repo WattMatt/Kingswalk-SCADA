@@ -12,7 +12,7 @@
     "noEmit": true,
     "baseUrl": ".",
     "paths": { "@/*": ["src/*"] },
-    "types": ["vitest/globals", "node"],
+    "types": ["vitest/globals", "node", "vite/client"],
     "skipLibCheck": true
   },
   "include": ["src"],
