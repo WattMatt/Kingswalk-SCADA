@@ -4,6 +4,9 @@
 
 BEGIN;
 
+-- Ensure idempotent breaker inserts are safe: unique constraint on (main_board_id, label)
+ALTER TABLE assets.breaker ADD CONSTRAINT IF NOT EXISTS breaker_mb_label_uq UNIQUE (main_board_id, label);
+
 -- ============================================================
 -- 1. Measuring packages
 -- ============================================================
@@ -181,7 +184,7 @@ LATERAL (VALUES
   ('DB-26',   'TM3', 'Tmax XT', 120, 'TP', 'MP2', '10.10.11.20'::inet)
 ) AS b(label, breaker_code, abb_family, rating_amp, poles, mp_code, device_ip)
 JOIN assets.distribution_board db ON db.code = b.label
-ON CONFLICT DO NOTHING;
+ON CONFLICT (main_board_id, label) DO NOTHING;
 
 -- ---- MB-2.1 (VLAN 21, drawing 643.E.302, 8 breakers) ----
 WITH mb AS (SELECT id FROM assets.main_board WHERE code = 'MB-2.1')
@@ -210,7 +213,7 @@ LATERAL (VALUES
   ('DB-12',  'TM3', 'Tmax XT', 120, 'TP', 'MP2', '10.10.21.18'::inet)
 ) AS b(label, breaker_code, abb_family, rating_amp, poles, mp_code, device_ip)
 JOIN assets.distribution_board db ON db.code = b.label
-ON CONFLICT DO NOTHING;
+ON CONFLICT (main_board_id, label) DO NOTHING;
 
 -- ---- MB-2.2 (VLAN 22, drawing 643.E.303, 9 breakers) ----
 WITH mb AS (SELECT id FROM assets.main_board WHERE code = 'MB-2.2')
@@ -240,7 +243,7 @@ LATERAL (VALUES
   ('DB-04',   'TM3', 'Tmax XT', 60,  'TP', 'MP2', '10.10.22.19'::inet)
 ) AS b(label, breaker_code, abb_family, rating_amp, poles, mp_code, device_ip)
 JOIN assets.distribution_board db ON db.code = b.label
-ON CONFLICT DO NOTHING;
+ON CONFLICT (main_board_id, label) DO NOTHING;
 
 -- ---- MB-2.3 (VLAN 23, drawing 643.E.304, 3 breakers) ----
 WITH mb AS (SELECT id FROM assets.main_board WHERE code = 'MB-2.3')
@@ -264,7 +267,7 @@ LATERAL (VALUES
   ('DB-16',    'TM3', 'Tmax XT', 100, 'TP', 'MP2', '10.10.23.13'::inet)
 ) AS b(label, breaker_code, abb_family, rating_amp, poles, mp_code, device_ip)
 JOIN assets.distribution_board db ON db.code = b.label
-ON CONFLICT DO NOTHING;
+ON CONFLICT (main_board_id, label) DO NOTHING;
 
 -- ---- MB-3.1 (VLAN 31, drawing 643.E.305, 24 breakers) ----
 WITH mb AS (SELECT id FROM assets.main_board WHERE code = 'MB-3.1')
@@ -309,7 +312,7 @@ LATERAL (VALUES
   ('DB-SR1',  'TM3', 'Tmax XT', 60,  'TP', 'MP2', '10.10.31.34'::inet)
 ) AS b(label, breaker_code, abb_family, rating_amp, poles, mp_code, device_ip)
 JOIN assets.distribution_board db ON db.code = b.label
-ON CONFLICT DO NOTHING;
+ON CONFLICT (main_board_id, label) DO NOTHING;
 
 -- ---- MB-4.1 (VLAN 41, drawing 643.E.306, 22 breakers) ----
 WITH mb AS (SELECT id FROM assets.main_board WHERE code = 'MB-4.1')
@@ -352,7 +355,7 @@ LATERAL (VALUES
   ('DB-70',    'TM3', 'Tmax XT', 150, 'TP', 'MP2', '10.10.41.32'::inet)
 ) AS b(label, breaker_code, abb_family, rating_amp, poles, mp_code, device_ip)
 JOIN assets.distribution_board db ON db.code = b.label
-ON CONFLICT DO NOTHING;
+ON CONFLICT (main_board_id, label) DO NOTHING;
 
 -- ---- MB-5.1 (VLAN 51, drawing 643.E.307, 6 breakers) ----
 WITH mb AS (SELECT id FROM assets.main_board WHERE code = 'MB-5.1')
@@ -379,7 +382,7 @@ LATERAL (VALUES
   ('DB-SR2',     'TM3', 'Tmax XT', 60,  'TP', 'MP2', '10.10.51.16'::inet)
 ) AS b(label, breaker_code, abb_family, rating_amp, poles, mp_code, device_ip)
 JOIN assets.distribution_board db ON db.code = b.label
-ON CONFLICT DO NOTHING;
+ON CONFLICT (main_board_id, label) DO NOTHING;
 
 -- ---- MB-5.2 (VLAN 52, drawing 643.E.308, 10 breakers) ----
 WITH mb AS (SELECT id FROM assets.main_board WHERE code = 'MB-5.2')
@@ -410,7 +413,7 @@ LATERAL (VALUES
   ('DB-93',  'TM3', 'Tmax XT', 200, 'TP', 'MP2', '10.10.52.20'::inet)
 ) AS b(label, breaker_code, abb_family, rating_amp, poles, mp_code, device_ip)
 JOIN assets.distribution_board db ON db.code = b.label
-ON CONFLICT DO NOTHING;
+ON CONFLICT (main_board_id, label) DO NOTHING;
 
 -- ---- MB-5.3 (VLAN 53, drawing 643.E.309, 12 breakers) ----
 WITH mb AS (SELECT id FROM assets.main_board WHERE code = 'MB-5.3')
@@ -443,6 +446,6 @@ LATERAL (VALUES
   ('DB-CM',    'TM3', 'Tmax XT', 80,  'TP', 'MP2', '10.10.53.22'::inet)
 ) AS b(label, breaker_code, abb_family, rating_amp, poles, mp_code, device_ip)
 JOIN assets.distribution_board db ON db.code = b.label
-ON CONFLICT DO NOTHING;
+ON CONFLICT (main_board_id, label) DO NOTHING;
 
 COMMIT;
