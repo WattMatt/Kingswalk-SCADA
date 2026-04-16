@@ -16,6 +16,7 @@ from app.routes.events import events_router
 from app.routes.health import router as health_router
 from app.routes.ingest import ingest_router
 from app.routes.mfa import router as mfa_router
+from app.ws.router import ws_router
 
 configure_logging(settings.log_level)
 logger = structlog.get_logger()
@@ -71,6 +72,7 @@ def create_app() -> FastAPI:
     app.include_router(ingest_router)
     app.include_router(assets_router)
     app.include_router(events_router)
+    app.include_router(ws_router)
 
     return app
 
