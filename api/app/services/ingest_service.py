@@ -15,7 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.redis_client import get_redis
 from app.repos import telemetry_repo
 from app.repos.telemetry_repo import RawSampleRow
-from app.services import threshold_service
+from app.services import threshold_service, watchdog_service
 
 log = structlog.get_logger()
 
@@ -41,6 +41,8 @@ async def handle_batch(db: AsyncSession, samples: list[_SampleLike]) -> int:
 
     Returns the number of newly inserted rows.
     """
+    watchdog_service.record_telemetry_received()
+
     rows = [
         RawSampleRow(
             ts=s.sampled_at,

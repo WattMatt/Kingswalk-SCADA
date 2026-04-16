@@ -1,3 +1,4 @@
+import asyncio
 from collections.abc import AsyncGenerator, Awaitable, Callable
 from contextlib import asynccontextmanager
 
@@ -16,6 +17,7 @@ from app.routes.events import events_router
 from app.routes.health import router as health_router
 from app.routes.ingest import ingest_router
 from app.routes.mfa import router as mfa_router
+from app.services import watchdog_service
 from app.ws.router import ws_router
 
 configure_logging(settings.log_level)
@@ -27,7 +29,13 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Startup and shutdown lifecycle."""
     logger.info("startup", environment=settings.environment, version=settings.version)
     await get_redis()  # Warm the singleton; prevents race at first concurrent ingest request
+    watchdog_task = asyncio.create_task(watchdog_service.watchdog_loop())
     yield
+    watchdog_task.cancel()
+    try:
+        await watchdog_task
+    except asyncio.CancelledError:
+        pass
     await close_redis()
     logger.info("shutdown")
 
