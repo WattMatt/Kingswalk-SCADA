@@ -1,8 +1,9 @@
 import uuid
-from datetime import datetime
+from datetime import date, datetime
+from decimal import Decimal
 
-from sqlalchemy import BigInteger, Boolean, DateTime, Enum, Float, ForeignKey, Integer, Text, func
-from sqlalchemy.dialects.postgresql import INET, JSONB, UUID
+from sqlalchemy import BigInteger, Boolean, Date, DateTime, Enum, Float, ForeignKey, Integer, Numeric, Text, func
+from sqlalchemy.dialects.postgresql import CIDR, INET, JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.engine import Base
@@ -228,4 +229,154 @@ class Threshold(Base):
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+
+# ============================================================
+# Asset models — schema: assets
+# ============================================================
+
+
+class MeasuringPackage(Base):
+    """Measuring package definition — maps to assets.measuring_package.
+
+    Describes the set of electrical functions monitored by an ABB M4M device.
+    The primary key is the short code (e.g. 'MP2', 'MP4').
+    """
+
+    __tablename__ = "measuring_package"
+    __table_args__ = {"schema": "assets"}
+
+    code: Mapped[str] = mapped_column(Text, primary_key=True)
+    description: Mapped[str] = mapped_column(Text, nullable=False)
+
+    breakers: Mapped[list["Breaker"]] = relationship("Breaker", back_populates="measuring_package")
+
+
+class MainBoard(Base):
+    """Main distribution board — maps to assets.main_board.
+
+    Each main board corresponds to one VLAN and one drawing.
+    It is the root of a breaker tree for a physical section of the shopping centre.
+    """
+
+    __tablename__ = "main_board"
+    __table_args__ = {"schema": "assets"}
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    code: Mapped[str] = mapped_column(Text, unique=True, nullable=False)
+    drawing: Mapped[str] = mapped_column(Text, nullable=False)
+    vlan_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    subnet: Mapped[str] = mapped_column(CIDR, nullable=False)
+    gateway_ip: Mapped[str] = mapped_column(INET, nullable=False)
+    location: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    deleted_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+
+    breakers: Mapped[list["Breaker"]] = relationship("Breaker", back_populates="main_board")
+
+
+class DistributionBoard(Base):
+    """Tenant distribution board — maps to assets.distribution_board.
+
+    Represents the sub-board at the tenant's premises that a breaker feeds into.
+    One breaker feeds exactly one distribution board (or tenant feed, but not both).
+    """
+
+    __tablename__ = "distribution_board"
+    __table_args__ = {"schema": "assets"}
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    code: Mapped[str] = mapped_column(Text, unique=True, nullable=False)
+    name: Mapped[str | None] = mapped_column(Text, nullable=True)
+    area_m2: Mapped[Decimal | None] = mapped_column(Numeric(8, 2), nullable=True)
+    cable_spec: Mapped[str | None] = mapped_column(Text, nullable=True)
+    essential_supply: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    generator_bank: Mapped[str | None] = mapped_column(
+        Enum("A", "B", name="generator_bank_enum", schema="assets", create_type=False),
+        nullable=True,
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    deleted_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+
+    breakers: Mapped[list["Breaker"]] = relationship("Breaker", back_populates="distribution_board")
+
+
+class Breaker(Base):
+    """Circuit breaker — maps to assets.breaker.
+
+    Each breaker belongs to one main board and optionally feeds one distribution
+    board or one tenant feed (enforced by DB CHECK constraint: not both).
+    The device_ip and protocol fields describe the Modbus TCP trip unit.
+    """
+
+    __tablename__ = "breaker"
+    __table_args__ = {"schema": "assets"}
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    main_board_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("assets.main_board.id"), nullable=False
+    )
+    label: Mapped[str] = mapped_column(Text, nullable=False)
+    breaker_code: Mapped[str] = mapped_column(Text, nullable=False)
+    abb_family: Mapped[str] = mapped_column(Text, nullable=False)
+    rating_amp: Mapped[int] = mapped_column(Integer, nullable=False)
+    poles: Mapped[str] = mapped_column(
+        Enum("SP", "DP", "TP", "TPN", "FP", name="poles_enum", schema="assets", create_type=False),
+        nullable=False,
+    )
+    mp_code: Mapped[str | None] = mapped_column(
+        Text, ForeignKey("assets.measuring_package.code"), nullable=True
+    )
+    feeds_db_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("assets.distribution_board.id"), nullable=True
+    )
+    feeds_tenant_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), nullable=True
+    )
+    essential_supply: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    device_ip: Mapped[str | None] = mapped_column(INET, nullable=True)
+    protocol: Mapped[str | None] = mapped_column(
+        Enum("modbus_tcp", "iec61850", "dual", name="protocol_enum", schema="assets", create_type=False),
+        nullable=True,
+    )
+    installed_at: Mapped[date | None] = mapped_column(Date, nullable=True)
+    replaced_at: Mapped[date | None] = mapped_column(Date, nullable=True)
+    replacement_note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    deleted_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+
+    main_board: Mapped["MainBoard"] = relationship("MainBoard", back_populates="breakers")
+    distribution_board: Mapped["DistributionBoard | None"] = relationship(
+        "DistributionBoard", back_populates="breakers"
+    )
+    measuring_package: Mapped["MeasuringPackage | None"] = relationship(
+        "MeasuringPackage", back_populates="breakers"
     )
