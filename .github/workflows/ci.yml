@@ -80,6 +80,8 @@ jobs:
             -f ../db/migrations/0002_canvas_layers.sql
           PGPASSWORD=scada_dev psql -h localhost -U scada -d kingswalk_scada_test \
             -f ../db/migrations/0003_raw_sample.sql
+          PGPASSWORD=scada_dev psql -h localhost -U scada -d kingswalk_scada_test \
+            -f ../db/migrations/0004_seed_assets.sql
       - name: Run full test suite
         run: pytest tests/ -v --tb=short
 
@@ -121,6 +123,21 @@ jobs:
             exit 1
           fi
           echo "OK: No write operations found in edge/"
+
+  edge-test:
+    name: Edge — Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: edge
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -e ".[dev]"
+      - run: python -m pytest tests/ -v --tb=short
 
   web-lint-type:
     name: Web — Lint & Type Check
