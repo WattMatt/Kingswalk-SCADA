@@ -10,7 +10,9 @@ from app.core.exceptions import AppError, app_error_handler
 from app.core.logging import configure_logging
 from app.core.redis_client import close_redis, get_redis
 from app.routes.admin import admin_router
+from app.routes.assets import assets_router
 from app.routes.auth import router as auth_router
+from app.routes.events import events_router
 from app.routes.health import router as health_router
 from app.routes.ingest import ingest_router
 from app.routes.mfa import router as mfa_router
@@ -67,6 +69,8 @@ def create_app() -> FastAPI:
     app.include_router(mfa_router)
     app.include_router(admin_router)
     app.include_router(ingest_router)
+    app.include_router(assets_router)
+    app.include_router(events_router)
 
     return app
 
