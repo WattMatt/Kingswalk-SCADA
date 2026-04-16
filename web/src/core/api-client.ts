@@ -1,5 +1,13 @@
 // web/src/core/api-client.ts
-import type { MfaConfirmResponse, MfaEnrollResponse, User, UserRole } from "./types";
+import type {
+  Breaker,
+  MainBoard,
+  MfaConfirmResponse,
+  MfaEnrollResponse,
+  ScadaEvent,
+  User,
+  UserRole,
+} from "./types";
 
 const BASE_URL = "/api";
 
@@ -90,5 +98,22 @@ export const apiClient = {
         method: "POST",
         body: JSON.stringify({ email, role }),
       }),
+  },
+
+  assets: {
+    boards: () => request<MainBoard[]>("/assets/boards"),
+    boardBreakers: (boardId: string) =>
+      request<Breaker[]>(`/assets/boards/${boardId}/breakers`),
+    breakers: (board?: string) =>
+      request<Breaker[]>(
+        `/assets/breakers${board ? `?board=${encodeURIComponent(board)}` : ""}`,
+      ),
+  },
+
+  events: {
+    list: (severity?: string) =>
+      request<ScadaEvent[]>(`/events${severity ? `?severity=${severity}` : ""}`),
+    ack: (eventId: number) =>
+      request<{ message: string }>(`/events/${eventId}/ack`, { method: "POST" }),
   },
 };
