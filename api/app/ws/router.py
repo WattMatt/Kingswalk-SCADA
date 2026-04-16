@@ -133,12 +133,12 @@ async def _redis_subscriber(websocket: WebSocket) -> None:
     finally:
         try:
             await pubsub.unsubscribe(_REDIS_CHANNEL)
-            await pubsub.aclose()
+            await pubsub.aclose()  # type: ignore[no-untyped-call]
         except Exception:
             pass
 
 
-@ws_router.websocket("/ws/live")  # type: ignore[untyped-decorator]
+@ws_router.websocket("/ws/live")
 async def websocket_endpoint(
     websocket: WebSocket,
     db: AsyncSession = Depends(get_db),
