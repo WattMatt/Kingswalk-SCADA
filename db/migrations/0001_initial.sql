@@ -1,12 +1,14 @@
 -- Kingswalk SCADA GUI — initial migration
 -- PostgreSQL 16 + TimescaleDB 2.x
 
-BEGIN;
-
+-- Extensions must be created outside a transaction block.
+-- TimescaleDB in particular cannot be initialised inside BEGIN/COMMIT.
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS citext;
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
-CREATE EXTENSION IF NOT EXISTS timescaledb;
+CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;
+
+BEGIN;
 
 CREATE SCHEMA IF NOT EXISTS core;
 CREATE SCHEMA IF NOT EXISTS assets;

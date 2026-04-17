@@ -18,9 +18,10 @@ from app.routes.health import router as health_router
 from app.routes.ingest import router as ingest_router
 from app.routes.mfa import router as mfa_router
 from app.routes.telemetry import telemetry_router
+from app.routes.ws import router as ws_router
 from app.services import watchdog_service
 from app.services.notification_service import escalation_loop
-from app.ws.router import ws_router
+from app.ws.router import ws_router as ws_live_router
 
 configure_logging(settings.log_level)
 logger = structlog.get_logger()
@@ -86,7 +87,8 @@ def create_app() -> FastAPI:
     app.include_router(assets_router)
     app.include_router(events_router)
     app.include_router(telemetry_router)
-    app.include_router(ws_router)
+    app.include_router(ws_router, prefix="/api")   # /api/ws — simple breaker snapshot
+    app.include_router(ws_live_router)              # /ws/live — Redis pub/sub full-sync
 
     return app
 
