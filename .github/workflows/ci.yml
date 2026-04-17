@@ -49,20 +49,13 @@ jobs:
           --health-timeout 5s
           --health-retries 10
     env:
-      DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
       DATABASE_URL: "postgresql+asyncpg://scada:scada_dev@localhost:5432/kingswalk_scada_test"
       # conftest.py reads TEST_DB_URL (defaults to port 5433 for local dev); CI uses port 5432
       TEST_DB_URL: "postgresql+asyncpg://scada:scada_dev@localhost:5432/kingswalk_scada_test"
       # Fallback is a valid base64-encoded 32-byte key — safe for CI, never for production
       MFA_ENCRYPTION_KEY: ${{ secrets.MFA_ENCRYPTION_KEY || 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=' }}
-      EDGE_API_KEY: "test-edge-api-key-for-ci-only"
+      EDGE_INGEST_TOKEN: "test-edge-ingest-token-for-ci-only"
     steps:
-      - name: Inject secrets from Doppler
-        if: ${{ env.DOPPLER_TOKEN != '' }}
-        uses: doppler/fetch-secrets-action@v2
-        with:
-          doppler-token: ${{ env.DOPPLER_TOKEN }}
-          inject-env-vars: true
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
