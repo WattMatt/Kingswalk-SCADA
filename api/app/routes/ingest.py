@@ -229,9 +229,9 @@ async def ingest_telemetry(
         # ── 5. Detect state changes and broadcast ─────────────────────
         now_iso = datetime.now(UTC).isoformat()
 
-        for sample in valid_samples:
-            sid = sample["breaker_id"]
-            new_state = sample["raw_state"]
+        for vs in valid_samples:
+            sid = vs["breaker_id"]
+            new_state = vs["raw_state"]
             old_state = prev_states.get(sid)
             meta = valid_breakers[sid]
 
