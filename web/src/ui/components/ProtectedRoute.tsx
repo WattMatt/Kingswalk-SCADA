@@ -12,8 +12,21 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center text-slate-400">
-        Loading…
+      <div
+        style={{
+          display: "flex",
+          height: "100vh",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "var(--bg-void)",
+          fontFamily: "var(--font-mono)",
+          fontSize: "0.72rem",
+          letterSpacing: "0.14em",
+          textTransform: "uppercase",
+          color: "var(--text-dim)",
+        }}
+      >
+        Authenticating…
       </div>
     );
   }

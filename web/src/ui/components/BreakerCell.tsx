@@ -1,5 +1,5 @@
 // web/src/ui/components/BreakerCell.tsx
-import type { BreakerState, BreakerStateValue } from "@/core/types";
+import type { BreakerLiveState, BreakerState } from "@/core/types";
 
 interface BreakerCellProps {
   breaker: BreakerState;
@@ -12,8 +12,8 @@ type StyleSet = {
   badge: string;
 };
 
-// Keyed by the exhaustive BreakerStateValue union — noUncheckedIndexedAccess safe
-const STATE_STYLES: Record<BreakerStateValue, StyleSet> = {
+// Keyed by the exhaustive BreakerLiveState union — noUncheckedIndexedAccess safe
+const STATE_STYLES: Record<BreakerLiveState, StyleSet> = {
   closed: {
     card: "border-green-800 bg-green-950",
     dot: "bg-green-400",
@@ -32,6 +32,12 @@ const STATE_STYLES: Record<BreakerStateValue, StyleSet> = {
     label: "text-red-400",
     badge: "text-red-400",
   },
+  comms_loss: {
+    card: "border-amber-800 bg-amber-950",
+    dot: "bg-amber-400",
+    label: "text-amber-400",
+    badge: "text-amber-400",
+  },
   unknown: {
     card: "border-amber-800 bg-amber-950",
     dot: "bg-amber-400",
@@ -40,8 +46,8 @@ const STATE_STYLES: Record<BreakerStateValue, StyleSet> = {
   },
 };
 
-function getStyles(state: BreakerStateValue, commsLoss: boolean): StyleSet {
-  if (commsLoss) return STATE_STYLES.unknown;
+function getStyles(state: BreakerLiveState, commsLoss: boolean): StyleSet {
+  if (commsLoss) return STATE_STYLES.comms_loss;
   return STATE_STYLES[state];
 }
 
@@ -61,7 +67,7 @@ function formatLastSeen(ts: string | null): string {
 }
 
 export function BreakerCell({ breaker }: BreakerCellProps) {
-  const styles = getStyles(breaker.state, breaker.comms_loss);
+  const styles = getStyles(breaker.state, breaker.comms_loss ?? false);
 
   const stateLabel = breaker.comms_loss ? "comms loss" : breaker.state;
 
@@ -69,7 +75,7 @@ export function BreakerCell({ breaker }: BreakerCellProps) {
     `Label: ${breaker.label}`,
     `State: ${stateLabel}`,
     `Board: ${breaker.main_board_ref}`,
-    `Last seen: ${formatLastSeen(breaker.last_seen)}`,
+    `Last seen: ${formatLastSeen(breaker.last_seen ?? null)}`,
   ].join("\n");
 
   return (
@@ -83,7 +89,7 @@ export function BreakerCell({ breaker }: BreakerCellProps) {
     >
       {/* Short label at top */}
       <span className={`text-[11px] font-semibold leading-tight ${styles.label}`}>
-        {shortLabel(breaker.label)}
+        {shortLabel(breaker.label ?? "")}
       </span>
 
       {/* State indicator dot */}

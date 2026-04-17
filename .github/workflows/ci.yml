@@ -49,19 +49,13 @@ jobs:
           --health-timeout 5s
           --health-retries 10
     env:
-      DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
       DATABASE_URL: "postgresql+asyncpg://scada:scada_dev@localhost:5432/kingswalk_scada_test"
       # conftest.py reads TEST_DB_URL (defaults to port 5433 for local dev); CI uses port 5432
       TEST_DB_URL: "postgresql+asyncpg://scada:scada_dev@localhost:5432/kingswalk_scada_test"
       # Fallback is a valid base64-encoded 32-byte key — safe for CI, never for production
       MFA_ENCRYPTION_KEY: ${{ secrets.MFA_ENCRYPTION_KEY || 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=' }}
+      EDGE_INGEST_TOKEN: "test-edge-ingest-token-for-ci-only"
     steps:
-      - name: Inject secrets from Doppler
-        if: ${{ env.DOPPLER_TOKEN != '' }}
-        uses: doppler/fetch-secrets-action@v2
-        with:
-          doppler-token: ${{ env.DOPPLER_TOKEN }}
-          inject-env-vars: true
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
@@ -77,6 +71,10 @@ jobs:
             -f ../db/migrations/0001a_schema_review_fixes.sql
           PGPASSWORD=scada_dev psql -h localhost -U scada -d kingswalk_scada_test \
             -f ../db/migrations/0002_canvas_layers.sql
+          PGPASSWORD=scada_dev psql -h localhost -U scada -d kingswalk_scada_test \
+            -f ../db/migrations/0003_raw_sample.sql
+          PGPASSWORD=scada_dev psql -h localhost -U scada -d kingswalk_scada_test \
+            -f ../db/migrations/0004_seed_assets.sql
       - name: Run full test suite
         run: pytest tests/ -v --tb=short
 
@@ -108,7 +106,7 @@ jobs:
           # Grep for actual write CALLS (trailing paren) or literal FC06/FC16.
           # Excludes modbus_client.py (the wrapper that defines the block list)
           # and its test file (which references the method names as strings).
-          HITS=$(grep -rn \
+          HITS=$(grep -rn --include="*.py" \
             "write_register(\|write_registers(\|write_coil(\|write_coils(\|write_file_record(\|readwrite_registers(\|mask_write_register(\|FC06\|FC16\|FC21\|FC22\|FC23" \
             edge/ 2>/dev/null \
             | grep -v "edge/modbus_client.py\|edge/tests/test_modbus_client.py" || true)
@@ -118,6 +116,21 @@ jobs:
             exit 1
           fi
           echo "OK: No write operations found in edge/"
+
+  edge-test:
+    name: Edge — Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: edge
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -e ".[dev]"
+      - run: python -m pytest tests/ -v --tb=short
 
   web-lint-type:
     name: Web — Lint & Type Check

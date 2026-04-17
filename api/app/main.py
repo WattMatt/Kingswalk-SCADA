@@ -1,3 +1,4 @@
+import asyncio
 from collections.abc import AsyncGenerator, Awaitable, Callable
 from contextlib import asynccontextmanager
 
@@ -8,12 +9,19 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.exceptions import AppError, app_error_handler
 from app.core.logging import configure_logging
+from app.core.redis_client import close_redis, get_redis
 from app.routes.admin import admin_router
+from app.routes.assets import assets_router
 from app.routes.auth import router as auth_router
+from app.routes.events import events_router
 from app.routes.health import router as health_router
 from app.routes.ingest import router as ingest_router
 from app.routes.mfa import router as mfa_router
+from app.routes.telemetry import telemetry_router
 from app.routes.ws import router as ws_router
+from app.services import watchdog_service
+from app.services.notification_service import escalation_loop
+from app.ws.router import ws_router as ws_live_router
 
 configure_logging(settings.log_level)
 logger = structlog.get_logger()
@@ -23,7 +31,18 @@ logger = structlog.get_logger()
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Startup and shutdown lifecycle."""
     logger.info("startup", environment=settings.environment, version=settings.version)
+    await get_redis()  # Warm the singleton; prevents race at first concurrent ingest request
+    watchdog_task = asyncio.create_task(watchdog_service.watchdog_loop())
+    escalation_task = asyncio.create_task(escalation_loop())
     yield
+    watchdog_task.cancel()
+    escalation_task.cancel()
+    for task in (watchdog_task, escalation_task):
+        try:
+            await task
+        except asyncio.CancelledError:
+            pass
+    await close_redis()
     logger.info("shutdown")
 
 
@@ -65,7 +84,11 @@ def create_app() -> FastAPI:
     app.include_router(mfa_router)
     app.include_router(admin_router)
     app.include_router(ingest_router, prefix="/api/ingest")
-    app.include_router(ws_router, prefix="/api")
+    app.include_router(assets_router)
+    app.include_router(events_router)
+    app.include_router(telemetry_router)
+    app.include_router(ws_router, prefix="/api")   # /api/ws — simple breaker snapshot
+    app.include_router(ws_live_router)              # /ws/live — Redis pub/sub full-sync
 
     return app
 

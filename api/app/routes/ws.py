@@ -20,10 +20,9 @@ from datetime import UTC, datetime
 import jwt
 import structlog
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-from sqlalchemy import select, text
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.config import settings
 from app.core.security import decode_token
 from app.db.engine import AsyncSessionLocal
 from app.services.ws_manager import ws_manager

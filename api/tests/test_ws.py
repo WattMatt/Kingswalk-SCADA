@@ -8,11 +8,9 @@ tests don't require a real database.
 from __future__ import annotations
 
 import uuid
-from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from httpx import ASGITransport, AsyncClient
 
 from app.core.security import create_access_token
 from app.main import app
@@ -144,7 +142,6 @@ async def test_ws_manager_disconnect_removes_connection() -> None:
 @pytest.mark.asyncio
 async def test_ws_manager_rate_limit_drops_excess_messages() -> None:
     """Token bucket drops messages beyond 10/sec burst."""
-    import time
 
     manager = WsManager()
     user_id = str(uuid.uuid4())

@@ -60,3 +60,21 @@ Demo case confirmed available:
 **Phase:** Phase 1 — Database
 **Detail:** `db/migrations/0001_initial.sql` wraps everything in `BEGIN/COMMIT`, but `CREATE MATERIALIZED VIEW ... WITH (timescaledb.continuous)` cannot run inside a transaction block. The migration rolls back entirely when reached.
 **Workaround:** Created `db/migrations/run_migrations.sh` helper that splits the migration at the continuous-aggregate boundary — running the core DDL in a transaction and the continuous aggregate + seed INSERTs outside it. The spec migration files are not modified.
+
+## 2026-04-16 — MP4 measuring package has no breakers in extract
+**Status:** QUESTION
+**Phase:** Phase 2
+**Detail:** The seed migration seeds measuring_package code='MP4' but `sld_per_mb_extract.json` has zero breakers with mp_code='MP4'. Every one of the 104 breakers uses MP2. Is the extract incomplete, or is MP4 reserved for future devices (M4M 30 incomer meters)?
+**Workaround:** MP2 used for all 104 breakers. MP4 row seeded but unreferenced.
+
+## 2026-04-16 — essential_supply and generator_bank not in extract
+**Status:** QUESTION
+**Phase:** Phase 2
+**Detail:** The `assets.distribution_board` schema has `essential_supply` (boolean) and `generator_bank` ('A'|'B') columns, but `sld_per_mb_extract.json` contains no such classification. All DBs seeded with essential_supply=false, generator_bank=NULL. Which DBs are on essential supply / generator bank A or B? This is important for bypass detection (B.3.1 says ~40 tenants per bank).
+**Workaround:** All distribution boards seeded without essential supply classification.
+
+## 2026-04-16 — assets.main_board missing device IP columns vs SPEC.md B.4
+**Status:** QUESTION
+**Phase:** Phase 2
+**Detail:** SPEC.md B.4 schema describes columns ekip_com_ip, m4m_1_ip, m4m_2_ip, switch_ip on assets.main_board, but these are absent from 0001_initial.sql DDL. The ORM model follows the actual DDL (correct). A schema migration is needed to add these columns if they are required for Phase 2 device polling.
+**Workaround:** Per-VLAN device IPs are implicit from the scheme 10.10.{VLAN}.{host}: Ekip Com=.10, M4M#1=.100, M4M#2=.101, edge switch=.2. Columns can be added in 0005_mb_device_ips.sql.

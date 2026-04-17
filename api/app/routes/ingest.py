@@ -21,9 +21,8 @@ from typing import Annotated
 
 import structlog
 from fastapi import APIRouter, Header, HTTPException, status
-from pydantic import BaseModel, UUID4, field_validator
+from pydantic import UUID4, BaseModel, field_validator
 from sqlalchemy import text
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.db.engine import AsyncSessionLocal
@@ -130,7 +129,8 @@ async def ingest_telemetry(
         result = await db.execute(
             text(
                 "SELECT id::text, label, "
-                "       (SELECT mb.code FROM assets.main_board mb WHERE mb.id = b.main_board_id) AS main_board_ref "
+                "       (SELECT mb.code FROM assets.main_board mb "
+                "        WHERE mb.id = b.main_board_id) AS main_board_ref "
                 "FROM assets.breaker b "
                 "WHERE id::text = ANY(:ids) AND deleted_at IS NULL"
             ),
@@ -229,9 +229,9 @@ async def ingest_telemetry(
         # ── 5. Detect state changes and broadcast ─────────────────────
         now_iso = datetime.now(UTC).isoformat()
 
-        for sample in valid_samples:
-            sid = sample["breaker_id"]
-            new_state = sample["raw_state"]
+        for vs in valid_samples:
+            sid = vs["breaker_id"]
+            new_state = vs["raw_state"]
             old_state = prev_states.get(sid)
             meta = valid_breakers[sid]
 
