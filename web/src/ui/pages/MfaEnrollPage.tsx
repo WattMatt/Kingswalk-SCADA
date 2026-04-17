@@ -36,22 +36,40 @@ export function MfaEnrollPage() {
     }
   }
 
+  // ── Recovery codes step ────────────────────────────────────────────────────
+
   if (step === "recovery") {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-950 p-4">
-        <div className="w-full max-w-lg rounded-xl border border-slate-800 bg-slate-900 p-8 shadow-2xl">
-          <h1 className="mb-2 text-xl font-semibold text-white">Save Your Recovery Codes</h1>
-          <p className="mb-4 text-sm text-red-400">
+      <div style={pageStyle}>
+        <div style={{ ...cardStyle, maxWidth: "480px" }}>
+          <div aria-hidden style={amberBarStyle} />
+
+          <h1 style={headingStyle}>Save Your Recovery Codes</h1>
+          <p style={{ ...subStyle, color: "var(--red-fault)", marginBottom: "1.25rem" }}>
             These codes will NOT be shown again. Store them somewhere safe.
           </p>
-          <div className="mb-6 rounded-lg bg-slate-800 p-4 font-mono text-sm text-slate-200">
-            {recoveryCodes.map((c) => (
-              <div key={c} className="py-0.5">{c}</div>
-            ))}
+
+          <div
+            style={{
+              background: "var(--bg-surface)",
+              border: "1px solid var(--border-mid)",
+              padding: "1rem",
+              marginBottom: "1.5rem",
+              fontFamily: "var(--font-mono)",
+              fontSize: "0.75rem",
+              letterSpacing: "0.05em",
+              color: "var(--text-mid)",
+              lineHeight: 1.9,
+            }}
+          >
+            {recoveryCodes.map((c) => <div key={c}>{c}</div>)}
           </div>
+
           <button
             onClick={() => navigate("/dashboard")}
-            className="w-full rounded-lg bg-blue-600 py-2 text-sm font-medium text-white hover:bg-blue-500"
+            style={{ ...submitStyle, background: "var(--amber)", cursor: "pointer" }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "#ffbc1f"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "var(--amber)"; }}
           >
             I've saved my recovery codes — continue
           </button>
@@ -60,29 +78,59 @@ export function MfaEnrollPage() {
     );
   }
 
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-950">
-      <div className="w-full max-w-sm rounded-xl border border-slate-800 bg-slate-900 p-8 shadow-2xl">
-        <h1 className="mb-2 text-xl font-semibold text-white">Set Up Two-Factor Authentication</h1>
-        <p className="mb-4 text-sm text-slate-400">
-          Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)
-        </p>
+  // ── QR / confirm step ──────────────────────────────────────────────────────
 
+  return (
+    <div style={pageStyle}>
+      <div style={cardStyle}>
+        <div aria-hidden style={amberBarStyle} />
+
+        <div style={{ marginBottom: "1.75rem" }}>
+          <h1 style={headingStyle}>Set Up Two-Factor Authentication</h1>
+          <p style={subStyle}>
+            Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)
+          </p>
+        </div>
+
+        <div style={{ height: "1px", background: "var(--border-dim)", marginBottom: "1.5rem" }} />
+
+        {/* QR code panel */}
         {provisioningUri ? (
-          <div className="mb-4 flex justify-center rounded-lg bg-white p-4">
+          <div
+            style={{
+              background: "#fff",
+              padding: "1rem",
+              display: "flex",
+              justifyContent: "center",
+              marginBottom: "1.5rem",
+            }}
+          >
             <QRCodeSVG value={provisioningUri} size={180} />
           </div>
         ) : (
-          <div className="mb-4 flex h-32 items-center justify-center rounded-lg bg-slate-800">
-            <p className="text-sm text-slate-400">{error ?? "Loading…"}</p>
+          <div
+            style={{
+              background: "var(--bg-surface)",
+              border: "1px solid var(--border-dim)",
+              height: "120px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              marginBottom: "1.5rem",
+              fontFamily: "var(--font-mono)",
+              fontSize: "0.65rem",
+              letterSpacing: "0.1em",
+              color: "var(--text-dim)",
+              textTransform: "uppercase",
+            }}
+          >
+            {error ?? "Loading…"}
           </div>
         )}
 
-        <form onSubmit={handleConfirm} className="space-y-4">
-          <div>
-            <label htmlFor="code" className="mb-1 block text-sm text-slate-300">
-              Enter the 6-digit code to confirm
-            </label>
+        <form onSubmit={handleConfirm} style={{ display: "flex", flexDirection: "column", gap: "1.1rem" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
+            <label htmlFor="code" style={labelStyle}>Enter the 6-digit code to confirm</label>
             <input
               id="code"
               type="text"
@@ -90,20 +138,26 @@ export function MfaEnrollPage() {
               autoComplete="one-time-code"
               value={code}
               onChange={(e) => setCode(e.target.value)}
-              className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-center text-lg font-mono tracking-widest text-white placeholder:text-slate-500 focus:border-blue-500 focus:outline-none"
               placeholder="000000"
               maxLength={6}
+              style={{ ...inputStyle, textAlign: "center", fontSize: "1.2rem", letterSpacing: "0.3em" }}
+              onFocus={(e) => { e.currentTarget.style.borderColor = "var(--amber)"; e.currentTarget.style.boxShadow = "0 0 0 1px var(--amber)"; }}
+              onBlur={(e) => { e.currentTarget.style.borderColor = "var(--border-mid)"; e.currentTarget.style.boxShadow = "none"; }}
             />
           </div>
 
-          {error && (
-            <p className="rounded-lg bg-red-950 px-3 py-2 text-sm text-red-400">{error}</p>
-          )}
+          {error && <div style={errorStyle}>{error}</div>}
 
           <button
             type="submit"
             disabled={loading || !provisioningUri}
-            className="w-full rounded-lg bg-blue-600 py-2 text-sm font-medium text-white hover:bg-blue-500 disabled:opacity-50"
+            style={{
+              ...submitStyle,
+              background: loading || !provisioningUri ? "var(--amber-dim)" : "var(--amber)",
+              cursor: loading || !provisioningUri ? "not-allowed" : "pointer",
+            }}
+            onMouseEnter={(e) => { if (!loading && provisioningUri) e.currentTarget.style.background = "#ffbc1f"; }}
+            onMouseLeave={(e) => { if (!loading && provisioningUri) e.currentTarget.style.background = "var(--amber)"; }}
           >
             {loading ? "Confirming…" : "Confirm & Enable MFA"}
           </button>
@@ -112,3 +166,87 @@ export function MfaEnrollPage() {
     </div>
   );
 }
+
+const pageStyle: React.CSSProperties = {
+  minHeight: "100vh",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  background: "var(--bg-void)",
+  padding: "2rem",
+};
+
+const cardStyle: React.CSSProperties = {
+  width: "100%",
+  maxWidth: "380px",
+  background: "var(--bg-panel)",
+  border: "1px solid var(--border-mid)",
+  padding: "2.5rem 2rem",
+  position: "relative",
+};
+
+const amberBarStyle: React.CSSProperties = {
+  position: "absolute",
+  top: 0, left: 0, right: 0,
+  height: "2px",
+  background: "linear-gradient(90deg, var(--amber) 0%, transparent 80%)",
+};
+
+const headingStyle: React.CSSProperties = {
+  fontFamily: "var(--font-display)",
+  fontWeight: 700,
+  fontSize: "1.3rem",
+  letterSpacing: "0.06em",
+  color: "var(--text-hi)",
+  marginBottom: "0.3rem",
+};
+
+const subStyle: React.CSSProperties = {
+  fontFamily: "var(--font-mono)",
+  fontSize: "0.68rem",
+  letterSpacing: "0.06em",
+  color: "var(--text-dim)",
+  lineHeight: 1.5,
+};
+
+const labelStyle: React.CSSProperties = {
+  fontFamily: "var(--font-mono)",
+  fontSize: "0.68rem",
+  letterSpacing: "0.12em",
+  textTransform: "uppercase",
+  color: "var(--text-mid)",
+};
+
+const inputStyle: React.CSSProperties = {
+  background: "var(--bg-surface)",
+  border: "1px solid var(--border-mid)",
+  padding: "0.55rem 0.75rem",
+  fontFamily: "var(--font-mono)",
+  fontSize: "0.82rem",
+  color: "var(--text-hi)",
+  outline: "none",
+  width: "100%",
+  transition: "border-color 0.15s, box-shadow 0.15s",
+};
+
+const errorStyle: React.CSSProperties = {
+  background: "rgba(242,54,69,0.10)",
+  border: "1px solid rgba(242,54,69,0.35)",
+  padding: "0.6rem 0.75rem",
+  fontFamily: "var(--font-mono)",
+  fontSize: "0.72rem",
+  color: "#f87171",
+};
+
+const submitStyle: React.CSSProperties = {
+  color: "#000",
+  border: "none",
+  padding: "0.65rem 1rem",
+  fontFamily: "var(--font-display)",
+  fontWeight: 700,
+  fontSize: "0.85rem",
+  letterSpacing: "0.14em",
+  textTransform: "uppercase",
+  transition: "background 0.15s",
+  width: "100%",
+};

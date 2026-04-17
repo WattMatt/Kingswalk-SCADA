@@ -1,1 +1,122 @@
 @import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap");
+
+/* ── SCADA Design System ─────────────────────────────────────────────────── */
+
+:root {
+  /* Backgrounds */
+  --bg-void:    #060a0e;
+  --bg-deep:    #090c0f;
+  --bg-panel:   #0d1218;
+  --bg-surface: #111b26;
+  --bg-raised:  #162233;
+
+  /* Borders */
+  --border-dim: #1c2a38;
+  --border-mid: #243548;
+  --border-hi:  #2e4560;
+
+  /* Amber — primary accent (industrial warning / active indicator) */
+  --amber:      #f6a600;
+  --amber-dim:  #7a5300;
+  --amber-glow: rgba(246,166,0,0.15);
+  --amber-text: #fdb830;
+
+  /* State colors */
+  --green-live: #16c784;
+  --green-glow: rgba(22,199,132,0.18);
+  --red-fault:  #f23645;
+  --red-glow:   rgba(242,54,69,0.20);
+  --orange-warn:#ff9400;
+  --orange-glow:rgba(255,148,0,0.18);
+  --grey-dead:  #3d5166;
+
+  /* Text */
+  --text-hi:    #dde5ed;
+  --text-mid:   #8a9fb5;
+  --text-dim:   #3d5166;
+  --text-amber: var(--amber-text);
+
+  /* Fonts */
+  --font-display: "Rajdhani", sans-serif;
+  --font-mono:    "JetBrains Mono", monospace;
+}
+
+/* ── Base ──────────────────────────────────────────────────────────────────── */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  background: var(--bg-void);
+  color: var(--text-hi);
+  font-family: var(--font-display);
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background: var(--bg-void);
+  /* Subtle scanline texture — PCB / control panel feel */
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.15) 2px,
+    rgba(0,0,0,0.15) 3px
+  );
+  min-height: 100vh;
+}
+
+/* ── LED State Classes (used on indicator dots) ────────────────────────────── */
+
+.led {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.led-closed {
+  background: var(--green-live);
+  box-shadow: 0 0 6px 2px var(--green-glow);
+}
+
+.led-open {
+  background: var(--orange-warn);
+  box-shadow: 0 0 6px 2px var(--orange-glow);
+}
+
+.led-tripped {
+  background: var(--red-fault);
+  box-shadow: 0 0 8px 3px var(--red-glow);
+  animation: pulse-red 1.4s ease-in-out infinite;
+}
+
+.led-comms_loss {
+  background: var(--grey-dead);
+  box-shadow: none;
+}
+
+.led-unknown {
+  background: #253344;
+  box-shadow: none;
+}
+
+@keyframes pulse-red {
+  0%, 100% { opacity: 1; box-shadow: 0 0 8px 3px var(--red-glow); }
+  50%       { opacity: 0.6; box-shadow: 0 0 14px 5px var(--red-glow); }
+}
+
+/* ── Amber accent line ─────────────────────────────────────────────────────── */
+
+.amber-rule {
+  height: 1px;
+  background: linear-gradient(90deg, var(--amber) 0%, transparent 70%);
+}
+
+/* ── Scrollbar ─────────────────────────────────────────────────────────────── */
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--bg-panel); }
+::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 2px; }
