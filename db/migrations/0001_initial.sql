@@ -221,20 +221,6 @@ SELECT add_retention_policy('telemetry.pq_sample',      INTERVAL '90 days');
 SELECT add_retention_policy('telemetry.breaker_state',  INTERVAL '5 years');
 SELECT add_retention_policy('telemetry.lighting_state', INTERVAL '5 years');
 
--- Continuous aggregates (1-min, 15-min, hourly, daily) for pq_sample
-CREATE MATERIALIZED VIEW telemetry.pq_1min
-WITH (timescaledb.continuous) AS
-SELECT device_id,
-       time_bucket('1 minute', ts) AS bucket,
-       avg(v_l1_n) AS v_l1_n, avg(v_l2_n) AS v_l2_n, avg(v_l3_n) AS v_l3_n,
-       avg(i_l1) AS i_l1, avg(i_l2) AS i_l2, avg(i_l3) AS i_l3,
-       avg(p_total) AS p_avg, max(p_total) AS p_max,
-       avg(pf_total) AS pf_avg,
-       avg(freq_hz) AS freq_avg,
-       avg(thd_v) AS thd_v_avg, avg(thd_i) AS thd_i_avg
-FROM telemetry.pq_sample
-GROUP BY device_id, bucket;
-
 -- =============================================================
 -- EVENTS
 -- =============================================================
@@ -330,3 +316,28 @@ INSERT INTO assets.main_board (code, drawing, vlan_id, subnet, gateway_ip, locat
  ('MB 5.3','643.E.309',53,'10.10.53.0/24','10.10.53.1','MB 5.3 switchroom');
 
 COMMIT;
+
+-- =============================================================
+-- CONTINUOUS AGGREGATES
+-- Must be created OUTSIDE a transaction block — TimescaleDB
+-- restriction: WITH (timescaledb.continuous) cannot run inside
+-- BEGIN/COMMIT.
+-- =============================================================
+
+CREATE MATERIALIZED VIEW telemetry.pq_1min
+WITH (timescaledb.continuous) AS
+SELECT device_id,
+       time_bucket('1 minute', ts) AS bucket,
+       avg(v_l1_n)   AS v_l1_n,   avg(v_l2_n)  AS v_l2_n,  avg(v_l3_n)  AS v_l3_n,
+       avg(i_l1)     AS i_l1,     avg(i_l2)    AS i_l2,    avg(i_l3)    AS i_l3,
+       avg(p_total)  AS p_avg,    max(p_total)  AS p_max,
+       avg(pf_total) AS pf_avg,
+       avg(freq_hz)  AS freq_avg,
+       avg(thd_v)    AS thd_v_avg, avg(thd_i)   AS thd_i_avg
+FROM telemetry.pq_sample
+GROUP BY device_id, bucket;
+
+SELECT add_continuous_aggregate_policy('telemetry.pq_1min',
+    start_offset => INTERVAL '3 hours',
+    end_offset   => INTERVAL '1 minute',
+    schedule_interval => INTERVAL '1 minute');
