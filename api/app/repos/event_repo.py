@@ -45,13 +45,31 @@ async def insert_event(
     await db.refresh(event)
 
     if notify:
-        # Lazy import avoids circular dependency at module load time.
+        # Lazy imports avoid circular dependencies at module load time.
+        # Import order: stdlib-shaped third-party first, then app modules.
+        from app.db.engine import AsyncSessionLocal  # noqa: PLC0415
         from app.services.notification_service import notify_new_event  # noqa: PLC0415
 
-        asyncio.create_task(
-            notify_new_event(db, event),
-            name=f"notify-{event.id}",
-        )
+        # Capture only the PK so the task is fully decoupled from the caller's
+        # session.  The caller may close or reuse `db` before the task runs.
+        event_id = event.id
+
+        async def _notify() -> None:
+            from sqlalchemy import select as sa_select  # noqa: PLC0415
+
+            from app.db.models import Event as EventModel  # noqa: PLC0415
+
+            async with AsyncSessionLocal() as notify_db:
+                result = await notify_db.execute(
+                    sa_select(EventModel).where(EventModel.id == event_id)
+                )
+                fresh_event = result.scalar_one_or_none()
+                if fresh_event is None:
+                    # Row gone before task ran (e.g. test teardown) — skip.
+                    return
+                await notify_new_event(notify_db, fresh_event)
+
+        asyncio.create_task(_notify(), name=f"notify-{event.id}")
 
     return event
 

@@ -73,6 +73,7 @@ export interface ScadaEvent {
   acknowledged_at: string | null;
 }
 
+// BreakerLiveState includes comms_loss as a display state (superset of BreakerStateValue)
 export type BreakerLiveState =
   | "closed"
   | "open"
@@ -80,10 +81,22 @@ export type BreakerLiveState =
   | "comms_loss"
   | "unknown";
 
+// BreakerStateValue is the wire protocol value (backend WebSocket API)
+export type BreakerStateValue = "closed" | "open" | "tripped" | "unknown";
+
+// BreakerState covers both the legacy (breakerId/lastUpdated) shape and the
+// live WebSocket shape (asset_id/label/main_board_ref/comms_loss/last_seen).
 export interface BreakerState {
-  breakerId: string;
-  state: BreakerLiveState;
-  lastUpdated: string; // ISO timestamp
+  // Legacy dashboard shape
+  breakerId?: string;
+  lastUpdated?: string; // ISO timestamp
+  // WebSocket API shape
+  asset_id?: string;
+  label?: string;           // e.g. "MB01-B01"
+  main_board_ref?: string;  // e.g. "MB01"
+  state: BreakerLiveState | BreakerStateValue;
+  comms_loss?: boolean;
+  last_seen?: string | null;
 }
 
 // ── Telemetry / PQ trends types ───────────────────────────────────────────────
@@ -146,3 +159,31 @@ export interface TelemetryUpdateMessage {
 }
 
 export type WsMessage = StateSyncMessage | TelemetryUpdateMessage;
+
+// ---------------------------------------------------------------------------
+// Real-time breaker WebSocket API — shared contract with backend ingest layer
+// ---------------------------------------------------------------------------
+
+export interface FullSnapshot {
+  type: "full_snapshot";
+  timestamp: string;
+  breakers: BreakerState[];
+}
+
+export interface BreakerUpdate {
+  type: "breaker_update";
+  asset_id: string;
+  label: string;
+  main_board_ref: string;
+  state: BreakerStateValue;
+  comms_loss: boolean;
+  timestamp: string;
+}
+
+export interface CommsLoss {
+  type: "comms_loss";
+  gateway_id: string;
+  timestamp: string;
+}
+
+export type ServerMessage = FullSnapshot | BreakerUpdate | CommsLoss;

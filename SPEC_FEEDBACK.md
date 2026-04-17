@@ -33,6 +33,28 @@ Format:
 - ✅ Vercel config ready (pending GitHub push)
 - ⏳ Vercel preview URL — pending GitHub remote setup and project import
 
+## 2026-04-15 — Demo Case Available for Bench Testing
+**Status:** INFO
+**Phase:** Phase 2 — Real-time Core
+
+Demo case confirmed available:
+- 3 Tmax XT breakers, each with Ekip Com Modbus TCP module on its own IP
+- Data logger + digital signalling modules enabled
+- Nearly all protection functions active
+
+**What changed in the build:**
+- Register comment convention updated: `# TODO: BENCH_TEST` (from ABB docs, unconfirmed) vs `# VERIFIED_REGISTER` (confirmed on demo hardware)
+- `DEMO_MODE=true` env var added to `edge/main.py` — switches poller from 9 production MBs to 3 demo case Tmax XT devices
+- `edge/edge.env.demo` added — copy and fill in the 3 Ekip Com IPs for your bench network (default: 192.168.0.100–102)
+- All existing register addresses remain `# TODO: BENCH_TEST` until register map PDFs arrive
+
+**Still needed (not yet available):**
+- Register map PDFs: `1SDH002031A1101` (Tmax XT) and `1SDH001140R0001` (Emax 2)
+- Actual bench network IPs for the 3 Ekip Com modules — update `DEMO_XT{1,2,3}_HOST` in `edge.env.demo`
+- Site VLAN/IP assignments from Profection
+
+**48V relay (Action 1) — still open.** Bypass detection design remains on hold until Profection confirms whether the relay has a readable digital/Modbus output. Due 2026-04-25.
+
 ## 2026-04-13 — 0001_initial.sql: CREATE MATERIALIZED VIEW inside transaction
 **Status:** SUGGESTION
 **Phase:** Phase 1 — Database

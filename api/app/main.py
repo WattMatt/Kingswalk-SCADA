@@ -15,7 +15,7 @@ from app.routes.assets import assets_router
 from app.routes.auth import router as auth_router
 from app.routes.events import events_router
 from app.routes.health import router as health_router
-from app.routes.ingest import ingest_router
+from app.routes.ingest import router as ingest_router
 from app.routes.mfa import router as mfa_router
 from app.routes.telemetry import telemetry_router
 from app.services import watchdog_service
@@ -82,7 +82,7 @@ def create_app() -> FastAPI:
     app.include_router(auth_router)
     app.include_router(mfa_router)
     app.include_router(admin_router)
-    app.include_router(ingest_router)
+    app.include_router(ingest_router, prefix="/api/ingest")
     app.include_router(assets_router)
     app.include_router(events_router)
     app.include_router(telemetry_router)

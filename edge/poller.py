@@ -37,14 +37,18 @@ class MbConfig:
 
 
 # ─── Register base addresses ───────────────────────────────────────────────────
-# ALL addresses are assumed from ABB datasheets.
-# TODO: VERIFY_REGISTER — address assumed from ABB datasheet
-BREAKER_STATE_BASE = 0x0000  # TODO: VERIFY_REGISTER — 4 registers per breaker group
-PQ_VOLTAGE_BASE    = 0x0100  # TODO: VERIFY_REGISTER — V_L1-N, V_L2-N, V_L3-N, V_L1-L2, V_L2-L3, V_L3-L1
-PQ_CURRENT_BASE    = 0x0110  # TODO: VERIFY_REGISTER — I_L1, I_L2, I_L3, I_N
-THD_VOLTAGE_BASE   = 0x0200  # TODO: VERIFY_REGISTER — THD_V L1, L2, L3
-ENERGY_BASE        = 0x0300  # TODO: VERIFY_REGISTER — kWh_imp, kWh_exp, kVArh_imp, kVArh_exp
-COUNTER_BASE       = 0x0400  # TODO: VERIFY_REGISTER — operational counters
+# Comment convention (SPEC.md §B.3.9):
+#   VERIFIED_REGISTER  — address confirmed on demo case hardware (bench test passed)
+#   TODO: BENCH_TEST   — address from ABB docs (1SDH002031A1101 / 1SDH001140R0001),
+#                        not yet confirmed on physical device
+#
+# Register map PDFs not yet received — all addresses remain BENCH_TEST until confirmed.
+BREAKER_STATE_BASE = 0x0000  # TODO: BENCH_TEST — 4 registers per breaker group (Ekip Com, Tmax XT)
+PQ_VOLTAGE_BASE    = 0x0100  # TODO: BENCH_TEST — V_L1-N, V_L2-N, V_L3-N, V_L1-L2, V_L2-L3, V_L3-L1 (M4M 30)
+PQ_CURRENT_BASE    = 0x0110  # TODO: BENCH_TEST — I_L1, I_L2, I_L3, I_N (M4M 30)
+THD_VOLTAGE_BASE   = 0x0200  # TODO: BENCH_TEST — THD_V L1, L2, L3 (M4M 30)
+ENERGY_BASE        = 0x0300  # TODO: BENCH_TEST — kWh_imp, kWh_exp, kVArh_imp, kVArh_exp (M4M 30)
+COUNTER_BASE       = 0x0400  # TODO: BENCH_TEST — operational counters (Ekip Com)
 
 
 class MbPoller:
@@ -130,7 +134,7 @@ class MbPoller:
     async def _poll_breaker_state(self) -> None:
         result = await self._client.read_holding_registers(
             BREAKER_STATE_BASE,
-            count=4,  # TODO: VERIFY_REGISTER — count depends on breaker count per MB
+            count=4,  # TODO: BENCH_TEST — count depends on breaker count per MB
             slave=self._config.slave,
         )
         now = datetime.now(timezone.utc)
@@ -147,7 +151,7 @@ class MbPoller:
     async def _poll_pq(self) -> None:
         result = await self._client.read_holding_registers(
             PQ_VOLTAGE_BASE,
-            count=6,  # TODO: VERIFY_REGISTER — V_L1-N, V_L2-N, V_L3-N, V_L1-L2, V_L2-L3, V_L3-L1
+            count=6,  # TODO: BENCH_TEST — V_L1-N, V_L2-N, V_L3-N, V_L1-L2, V_L2-L3, V_L3-L1
             slave=self._config.slave,
         )
         now = datetime.now(timezone.utc)
@@ -164,7 +168,7 @@ class MbPoller:
     async def _poll_thd(self) -> None:
         result = await self._client.read_holding_registers(
             THD_VOLTAGE_BASE,
-            count=3,  # TODO: VERIFY_REGISTER — THD_V L1, L2, L3
+            count=3,  # TODO: BENCH_TEST — THD_V L1, L2, L3
             slave=self._config.slave,
         )
         now = datetime.now(timezone.utc)
@@ -181,7 +185,7 @@ class MbPoller:
     async def _poll_energy(self) -> None:
         result = await self._client.read_holding_registers(
             ENERGY_BASE,
-            count=4,  # TODO: VERIFY_REGISTER — kWh_imp, kWh_exp, kVArh_imp, kVArh_exp
+            count=4,  # TODO: BENCH_TEST — kWh_imp, kWh_exp, kVArh_imp, kVArh_exp
             slave=self._config.slave,
         )
         now = datetime.now(timezone.utc)
@@ -198,7 +202,7 @@ class MbPoller:
     async def _poll_counter(self) -> None:
         result = await self._client.read_holding_registers(
             COUNTER_BASE,
-            count=2,  # TODO: VERIFY_REGISTER — operational counters
+            count=2,  # TODO: BENCH_TEST — operational counters
             slave=self._config.slave,
         )
         now = datetime.now(timezone.utc)

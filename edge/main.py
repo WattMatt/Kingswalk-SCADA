@@ -23,19 +23,34 @@ from edge.sync import CloudSync
 
 log = structlog.get_logger()
 
-# 9 main boards — IPs are VLAN-specific; configure via environment variables.
-# Defaults are illustrative only and must be updated for the site network.
-_MB_CONFIGS: list[MbConfig] = [
-    MbConfig(mb_id="MB_1_1", host=os.getenv("MB_1_1_HOST", "10.10.11.10")),   # TODO: VERIFY_REGISTER host
-    MbConfig(mb_id="MB_2_1", host=os.getenv("MB_2_1_HOST", "10.10.21.10")),   # TODO: VERIFY_REGISTER host
-    MbConfig(mb_id="MB_2_2", host=os.getenv("MB_2_2_HOST", "10.10.22.10")),   # TODO: VERIFY_REGISTER host
-    MbConfig(mb_id="MB_2_3", host=os.getenv("MB_2_3_HOST", "10.10.23.10")),   # TODO: VERIFY_REGISTER host
-    MbConfig(mb_id="MB_3_1", host=os.getenv("MB_3_1_HOST", "10.10.31.10")),   # TODO: VERIFY_REGISTER host
-    MbConfig(mb_id="MB_4_1", host=os.getenv("MB_4_1_HOST", "10.10.41.10")),   # TODO: VERIFY_REGISTER host
-    MbConfig(mb_id="MB_5_1", host=os.getenv("MB_5_1_HOST", "10.10.51.10")),   # TODO: VERIFY_REGISTER host
-    MbConfig(mb_id="MB_5_2", host=os.getenv("MB_5_2_HOST", "10.10.52.10")),   # TODO: VERIFY_REGISTER host
-    MbConfig(mb_id="MB_5_3", host=os.getenv("MB_5_3_HOST", "10.10.53.10")),   # TODO: VERIFY_REGISTER host
-]
+# ─── Device configuration ─────────────────────────────────────────────────────
+# Set DEMO_MODE=true to poll the bench test demo case (3 Tmax XT via Ekip Com)
+# instead of the full production set of 9 main boards.
+# See edge.env.demo for demo case environment variables.
+
+def _build_configs() -> list[MbConfig]:
+    if os.getenv("DEMO_MODE", "false").lower() == "true":
+        # Demo case: 3 Tmax XT breakers, each with Ekip Com Modbus TCP on its own IP.
+        # IPs set via DEMO_XT{1,2,3}_HOST — configure to match your bench test network.
+        log.info("demo_mode_active", note="polling demo case hardware, not production VLANs")
+        return [
+            MbConfig(mb_id="DEMO_XT1", host=os.environ["DEMO_XT1_HOST"]),  # TODO: BENCH_TEST — set IP of XT1 Ekip Com
+            MbConfig(mb_id="DEMO_XT2", host=os.environ["DEMO_XT2_HOST"]),  # TODO: BENCH_TEST — set IP of XT2 Ekip Com
+            MbConfig(mb_id="DEMO_XT3", host=os.environ["DEMO_XT3_HOST"]),  # TODO: BENCH_TEST — set IP of XT3 Ekip Com
+        ]
+    # Production: 9 main boards — IPs are VLAN-specific per Profection site survey.
+    # TODO: BENCH_TEST — all IPs provisional until Profection confirms VLAN assignments.
+    return [
+        MbConfig(mb_id="MB_1_1", host=os.getenv("MB_1_1_HOST", "10.10.11.10")),  # TODO: BENCH_TEST host
+        MbConfig(mb_id="MB_2_1", host=os.getenv("MB_2_1_HOST", "10.10.21.10")),  # TODO: BENCH_TEST host
+        MbConfig(mb_id="MB_2_2", host=os.getenv("MB_2_2_HOST", "10.10.22.10")),  # TODO: BENCH_TEST host
+        MbConfig(mb_id="MB_2_3", host=os.getenv("MB_2_3_HOST", "10.10.23.10")),  # TODO: BENCH_TEST host
+        MbConfig(mb_id="MB_3_1", host=os.getenv("MB_3_1_HOST", "10.10.31.10")),  # TODO: BENCH_TEST host
+        MbConfig(mb_id="MB_4_1", host=os.getenv("MB_4_1_HOST", "10.10.41.10")),  # TODO: BENCH_TEST host
+        MbConfig(mb_id="MB_5_1", host=os.getenv("MB_5_1_HOST", "10.10.51.10")),  # TODO: BENCH_TEST host
+        MbConfig(mb_id="MB_5_2", host=os.getenv("MB_5_2_HOST", "10.10.52.10")),  # TODO: BENCH_TEST host
+        MbConfig(mb_id="MB_5_3", host=os.getenv("MB_5_3_HOST", "10.10.53.10")),  # TODO: BENCH_TEST host
+    ]
 
 
 async def _health_handler(request: web.Request) -> web.Response:
@@ -95,7 +110,7 @@ async def main() -> None:
     await buffer.initialise()
     log.info("buffer_initialised", path=buffer_path)
 
-    pollers = [MbPoller(cfg, buffer) for cfg in _MB_CONFIGS]
+    pollers = [MbPoller(cfg, buffer) for cfg in _build_configs()]
     cloud_sync = CloudSync(buffer=buffer, cloud_url=cloud_url, edge_token=edge_token)
 
     health_app = web.Application()

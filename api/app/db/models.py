@@ -395,3 +395,18 @@ class Breaker(Base):
     measuring_package: Mapped["MeasuringPackage | None"] = relationship(
         "MeasuringPackage", back_populates="breakers"
     )
+
+
+class BreakerState(Base):
+    """Breaker state hypertable row — matches telemetry.breaker_state."""
+
+    __tablename__ = "breaker_state"
+    __table_args__ = {"schema": "telemetry"}
+
+    ts: Mapped[datetime] = mapped_column(DateTime(timezone=True), primary_key=True)
+    breaker_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("assets.breaker.id"), primary_key=True, nullable=False
+    )
+    state: Mapped[str] = mapped_column(Text, nullable=False)
+    trip_cause: Mapped[str | None] = mapped_column(Text, nullable=True)
+    contact_source: Mapped[str | None] = mapped_column(Text, nullable=True)
