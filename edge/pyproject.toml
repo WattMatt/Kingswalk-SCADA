@@ -15,6 +15,9 @@ dependencies = [
     "sdnotify>=0.3.0",
 ]
 
+[project.scripts]
+kingswalk-simulator = "edge.simulator:main"
+
 [project.optional-dependencies]
 dev = [
     "pytest>=8.0.0",
