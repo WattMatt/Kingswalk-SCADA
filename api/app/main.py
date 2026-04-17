@@ -18,6 +18,7 @@ from app.routes.health import router as health_router
 from app.routes.ingest import ingest_router
 from app.routes.mfa import router as mfa_router
 from app.services import watchdog_service
+from app.services.notification_service import escalation_loop
 from app.ws.router import ws_router
 
 configure_logging(settings.log_level)
@@ -30,12 +31,15 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info("startup", environment=settings.environment, version=settings.version)
     await get_redis()  # Warm the singleton; prevents race at first concurrent ingest request
     watchdog_task = asyncio.create_task(watchdog_service.watchdog_loop())
+    escalation_task = asyncio.create_task(escalation_loop())
     yield
     watchdog_task.cancel()
-    try:
-        await watchdog_task
-    except asyncio.CancelledError:
-        pass
+    escalation_task.cancel()
+    for task in (watchdog_task, escalation_task):
+        try:
+            await task
+        except asyncio.CancelledError:
+            pass
     await close_redis()
     logger.info("shutdown")
 

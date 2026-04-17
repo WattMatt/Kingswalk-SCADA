@@ -2,12 +2,16 @@
 """Repository for alarm events."""
 from __future__ import annotations
 
+import asyncio
 from datetime import UTC, datetime, timedelta
 
+import structlog
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import Event
+
+log = structlog.get_logger()
 
 
 async def insert_event(
@@ -17,8 +21,19 @@ async def insert_event(
     kind: str,
     message: str,
     payload: dict[str, object] | None = None,
+    notify: bool = True,
 ) -> Event:
-    """Insert a new alarm event. Returns the persisted Event row."""
+    """Insert a new alarm event. Returns the persisted Event row.
+
+    Args:
+        db: Async database session.
+        severity: One of info, warning, error, critical.
+        kind: Machine-readable event type key.
+        message: Human-readable description.
+        payload: Optional structured metadata dict.
+        notify: If True (default), fire tier-1 email notification and register
+                tier-2 escalation for warning/error/critical events.
+    """
     event = Event(
         severity=severity,
         kind=kind,
@@ -28,6 +43,16 @@ async def insert_event(
     db.add(event)
     await db.commit()
     await db.refresh(event)
+
+    if notify:
+        # Lazy import avoids circular dependency at module load time.
+        from app.services.notification_service import notify_new_event  # noqa: PLC0415
+
+        asyncio.create_task(
+            notify_new_event(db, event),
+            name=f"notify-{event.id}",
+        )
+
     return event
 
 

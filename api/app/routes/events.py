@@ -2,6 +2,7 @@
 """Event and alarm endpoints — list recent events, acknowledge alarms."""
 from __future__ import annotations
 
+import asyncio
 import uuid
 from datetime import UTC, datetime
 
@@ -15,6 +16,7 @@ from app.core.exceptions import AppError, NotFoundError
 from app.core.rbac import get_current_user
 from app.db.engine import get_db
 from app.db.models import AuditLog, Event, User
+from app.services.notification_service import cancel_escalation
 
 log = structlog.get_logger()
 
@@ -116,6 +118,12 @@ async def acknowledge_event(
     db.add(audit)
     await db.commit()
     await db.refresh(event)
+
+    # Cancel any pending tier-2 escalation for this alarm
+    asyncio.create_task(
+        cancel_escalation(event_id),
+        name=f"cancel-escalation-{event_id}",
+    )
 
     log.info(
         "event.acknowledged",
