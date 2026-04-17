@@ -6,6 +6,7 @@ import { useAuthStore } from "@/core/auth-store";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { DashboardPage } from "./pages/DashboardPage";
 import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
+import { TrendsPage } from "./pages/TrendsPage";
 import { LoginPage } from "./pages/LoginPage";
 import { MfaChallengePage } from "./pages/MfaChallengePage";
 import { MfaEnrollPage } from "./pages/MfaEnrollPage";
@@ -44,6 +45,14 @@ export function App() {
           element={
             <ProtectedRoute>
               <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/trends"
+          element={
+            <ProtectedRoute>
+              <TrendsPage />
             </ProtectedRoute>
           }
         />

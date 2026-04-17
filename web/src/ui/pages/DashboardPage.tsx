@@ -187,6 +187,47 @@ export function DashboardPage() {
           </span>
         </div>
 
+        {/* Nav links */}
+        <div style={{ display: "flex", alignItems: "center", gap: "0.1rem" }}>
+          <button
+            style={{
+              background: "transparent",
+              border: "none",
+              borderBottom: "2px solid var(--amber)",
+              padding: "0.2rem 0",
+              cursor: "default",
+              fontFamily: "var(--font-mono)",
+              fontSize: "0.68rem",
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              color: "var(--amber-text)",
+            }}
+          >
+            Dashboard
+          </button>
+          <div style={{ width: "1px", height: "12px", background: "var(--border-dim)", margin: "0 0.5rem" }} />
+          <button
+            onClick={() => navigate("/trends")}
+            style={{
+              background: "transparent",
+              border: "none",
+              borderBottom: "2px solid transparent",
+              padding: "0.2rem 0",
+              cursor: "pointer",
+              fontFamily: "var(--font-mono)",
+              fontSize: "0.68rem",
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              color: "var(--text-mid)",
+              transition: "color 0.15s",
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = "var(--text-hi)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = "var(--text-mid)"; }}
+          >
+            PQ Trends
+          </button>
+        </div>
+
         {/* Spacer */}
         <div style={{ flex: 1 }} />
 

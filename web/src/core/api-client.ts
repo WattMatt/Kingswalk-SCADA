@@ -2,9 +2,11 @@
 import type {
   Breaker,
   MainBoard,
+  MetricName,
   MfaConfirmResponse,
   MfaEnrollResponse,
   ScadaEvent,
+  TelemetryResponse,
   User,
   UserRole,
 } from "./types";
@@ -115,5 +117,26 @@ export const apiClient = {
       request<ScadaEvent[]>(`/events${severity ? `?severity=${severity}` : ""}`),
     ack: (eventId: number) =>
       request<{ message: string }>(`/events/${eventId}/ack`, { method: "POST" }),
+  },
+
+  telemetry: {
+    query: (params: {
+      boardId: string;
+      metric?: MetricName;
+      start?: string;    // ISO 8601
+      end?: string;      // ISO 8601
+      bucketMinutes?: number;
+    }): Promise<TelemetryResponse> => {
+      const qs = new URLSearchParams({
+        board_id: params.boardId,
+        ...(params.metric          && { metric: params.metric }),
+        ...(params.start           && { start: params.start }),
+        ...(params.end             && { end: params.end }),
+        ...(params.bucketMinutes != null && {
+          bucket_minutes: String(params.bucketMinutes),
+        }),
+      });
+      return request<TelemetryResponse>(`/telemetry?${qs.toString()}`);
+    },
   },
 };

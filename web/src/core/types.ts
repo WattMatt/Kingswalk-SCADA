@@ -86,6 +86,45 @@ export interface BreakerState {
   lastUpdated: string; // ISO timestamp
 }
 
+// ── Telemetry / PQ trends types ───────────────────────────────────────────────
+
+export type MetricName =
+  | "voltage_ln"
+  | "voltage_ll"
+  | "current"
+  | "frequency"
+  | "power_factor"
+  | "thd";
+
+export const METRIC_LABELS: Record<MetricName, string> = {
+  voltage_ln:   "Voltage L-N",
+  voltage_ll:   "Voltage L-L",
+  current:      "Current",
+  frequency:    "Frequency",
+  power_factor: "Power Factor",
+  thd:          "THD Voltage",
+};
+
+export interface TelemetryPoint {
+  ts: string;    // ISO 8601 UTC
+  value: number; // Scaled engineering unit
+}
+
+export interface TelemetrySeries {
+  label: string;
+  register_addr: number;
+  data: TelemetryPoint[];
+}
+
+export interface TelemetryResponse {
+  board_id: string;
+  board_code: string;
+  metric: MetricName;
+  unit: string;
+  labels: string[];
+  series: TelemetrySeries[];
+}
+
 // ── WebSocket message types ───────────────────────────────────────────────────
 
 export interface StateSyncMessage {

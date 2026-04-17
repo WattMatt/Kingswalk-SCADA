@@ -48,9 +48,68 @@ async def insert_raw_batch(db: AsyncSession, samples: list[RawSampleRow]) -> int
     await db.commit()
     # asyncpg returns -1 for rowcount when ON CONFLICT DO NOTHING skips all rows;
     # guard against that to ensure we always return a non-negative count.
-    inserted = max(0, result.rowcount) if result.rowcount is not None else 0
+    inserted = max(0, result.rowcount) if result.rowcount is not None else 0  # type: ignore[attr-defined]
     log.info("raw_batch_inserted", count=inserted, total=len(samples))
     return inserted
+
+
+async def query_telemetry(
+    db: AsyncSession,
+    device_id: str,
+    register_addresses: list[int],
+    start: datetime,
+    end: datetime,
+    bucket_minutes: int = 1,
+) -> list[dict[str, object]]:
+    """Return time-bucketed average register values within [start, end).
+
+    Rows are grouped into equal-width buckets of *bucket_minutes* minutes using
+    epoch arithmetic (works on any PostgreSQL version, no TimescaleDB required).
+
+    Returns a list of dicts with keys:
+      bucket            – datetime (UTC, timezone-aware)
+      register_address  – int
+      avg_value         – float (raw register integer, caller applies scale)
+    """
+    if not register_addresses:
+        return []
+
+    from sqlalchemy import bindparam  # noqa: PLC0415
+
+    stmt = text(
+        "SELECT "
+        "  to_timestamp("
+        "    floor(extract(epoch from ts) / :bucket_sec) * :bucket_sec"
+        "  ) AS bucket, "
+        "  register_address, "
+        "  AVG(raw_value)::float AS avg_value "
+        "FROM telemetry.raw_sample "
+        "WHERE device_id = :device_id "
+        "  AND register_address IN :registers "
+        "  AND ts >= :start AND ts < :end "
+        "GROUP BY 1, register_address "
+        "ORDER BY 1, register_address"
+    ).bindparams(bindparam("registers", expanding=True))
+
+    result = await db.execute(
+        stmt,
+        {
+            "device_id": device_id,
+            "registers": register_addresses,
+            "start": start,
+            "end": end,
+            "bucket_sec": bucket_minutes * 60,
+        },
+    )
+    rows = result.fetchall()
+    return [
+        {
+            "bucket": row.bucket,
+            "register_address": row.register_address,
+            "avg_value": row.avg_value,
+        }
+        for row in rows
+    ]
 
 
 async def latest_per_device(db: AsyncSession) -> list[dict[str, object]]:

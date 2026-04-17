@@ -16,6 +16,7 @@ from app.routes.auth import router as auth_router
 from app.routes.events import events_router
 from app.routes.health import router as health_router
 from app.routes.ingest import ingest_router
+from app.routes.telemetry import telemetry_router
 from app.routes.mfa import router as mfa_router
 from app.services import watchdog_service
 from app.services.notification_service import escalation_loop
@@ -84,6 +85,7 @@ def create_app() -> FastAPI:
     app.include_router(ingest_router)
     app.include_router(assets_router)
     app.include_router(events_router)
+    app.include_router(telemetry_router)
     app.include_router(ws_router)
 
     return app
