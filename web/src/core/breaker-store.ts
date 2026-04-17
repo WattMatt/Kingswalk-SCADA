@@ -26,7 +26,9 @@ export const useBreakerStore = create<BreakerStore>((set, get) => ({
   setSnapshot: (breakers) => {
     const mapped: Record<string, BreakerState> = {};
     for (const b of breakers) {
-      mapped[b.asset_id] = b;
+      if (b.asset_id !== undefined) {
+        mapped[b.asset_id] = b;
+      }
     }
     set({ breakers: mapped, lastSnapshotAt: new Date().toISOString() });
   },
@@ -54,14 +56,15 @@ export const useBreakerStore = create<BreakerStore>((set, get) => ({
     const groups: Record<string, BreakerState[]> = {};
     for (const breaker of Object.values(breakers)) {
       const board = breaker.main_board_ref;
-      if (!groups[board]) {
+      if (board === undefined) continue;
+      if (groups[board] === undefined) {
         groups[board] = [];
       }
       groups[board].push(breaker);
     }
     // Sort breakers within each board by label
     for (const board of Object.keys(groups)) {
-      groups[board]?.sort((a, b) => a.label.localeCompare(b.label));
+      groups[board]?.sort((a, b) => (a.label ?? "").localeCompare(b.label ?? ""));
     }
     return groups;
   },

@@ -1,7 +1,7 @@
 // web/src/core/useScadaWebSocket.ts
 import { useEffect, useRef } from "react";
 import { useBreakerStore } from "./breaker-store";
-import type { BreakerState, ServerMessage } from "./types";
+import type { BreakerState, BreakerStateValue, ServerMessage } from "./types";
 
 // ---------------------------------------------------------------------------
 // Mock snapshot — 104 breakers across 9 boards (MB01: 12, MB02–MB08: 12 each,
@@ -102,11 +102,11 @@ export function useScadaWebSocket(): { connectionStatus: string } {
 
         applyUpdate({
           type: "breaker_update",
-          asset_id: updated.asset_id,
-          label: updated.label,
-          main_board_ref: updated.main_board_ref,
-          state: updated.state,
-          comms_loss: updated.comms_loss,
+          asset_id: updated.asset_id ?? "",
+          label: updated.label ?? "",
+          main_board_ref: updated.main_board_ref ?? "",
+          state: updated.state as BreakerStateValue,
+          comms_loss: updated.comms_loss ?? false,
           timestamp: now,
         });
       }, 5_000);

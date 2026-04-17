@@ -6,12 +6,11 @@ import { useAlarmStore } from "@/core/alarm-store";
 import { useAssetStore } from "@/core/asset-store";
 import { useAuthStore } from "@/core/auth-store";
 import type { BreakerLiveState, StateSyncMessage } from "@/core/types";
-import { useBreakerStore } from "@/core/breaker-store";
 import { useScadaWebSocket } from "@/core/useScadaWebSocket";
 import { wsClient } from "@/core/ws-client";
 import { AlarmPanel } from "../components/AlarmPanel";
 import { BreakerCard } from "../components/BreakerCard";
-import { BreakerGrid } from "@/ui/components/BreakerGrid";
+
 
 const WS_BASE =
   (import.meta.env["VITE_WS_URL"] as string | undefined) ?? "ws://localhost:8000";
@@ -30,14 +29,11 @@ export function DashboardPage() {
   const { boards, breakers, fetchBoards, fetchBreakers } = useAssetStore();
   const { alarms, setAlarms, isReconnecting, setConnected, setReconnecting } =
     useAlarmStore();
-  const getAlarmCount = useBreakerStore((s) => s.getAlarmCount);
-  const { connectionStatus } = useScadaWebSocket();
+  useScadaWebSocket(); // Connect WebSocket; connection status managed in breaker-store
 
   const [selectedBoardId, setSelectedBoardId] = useState<string | null>(null);
   const [stateMap] = useState<StateMap>({});
   const [wsConnected, setWsConnected] = useState(false);
-
-  const alarmCount = getAlarmCount();
 
   // ── Data fetch ──────────────────────────────────────────────────────────────
 

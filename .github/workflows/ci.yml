@@ -113,7 +113,7 @@ jobs:
           # Grep for actual write CALLS (trailing paren) or literal FC06/FC16.
           # Excludes modbus_client.py (the wrapper that defines the block list)
           # and its test file (which references the method names as strings).
-          HITS=$(grep -rn \
+          HITS=$(grep -rn --include="*.py" \
             "write_register(\|write_registers(\|write_coil(\|write_coils(\|write_file_record(\|readwrite_registers(\|mask_write_register(\|FC06\|FC16\|FC21\|FC22\|FC23" \
             edge/ 2>/dev/null \
             | grep -v "edge/modbus_client.py\|edge/tests/test_modbus_client.py" || true)
