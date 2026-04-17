@@ -19,7 +19,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from httpx import AsyncClient
 
-
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
 _BOARD_UUID = uuid.uuid4()
@@ -107,7 +106,7 @@ async def test_telemetry_board_not_found_returns_404(client: AsyncClient) -> Non
 
     app.dependency_overrides[get_current_user] = lambda: _make_auth_user()
     try:
-        with patch("app.routes.telemetry.select") as mock_select:
+        with patch("app.routes.telemetry.select"):
             # Make db.execute return a result with no rows
             mock_result = MagicMock()
             mock_result.one_or_none.return_value = None
@@ -158,7 +157,8 @@ async def test_telemetry_returns_correct_shape(client: AsyncClient) -> None:
         {"bucket": bucket_ts, "register_address": 0x0101, "avg_value": 2305.0},
         {"bucket": bucket_ts, "register_address": 0x0102, "avg_value": 2315.0},
     ]
-    with patch("app.routes.telemetry.telemetry_repo.query_telemetry", new_callable=AsyncMock) as mock_query:
+    _qry = "app.routes.telemetry.telemetry_repo.query_telemetry"
+    with patch(_qry, new_callable=AsyncMock) as mock_query:
         mock_query.return_value = fake_rows
         resp = await client.get(
             "/api/telemetry",
@@ -207,7 +207,8 @@ async def test_telemetry_frequency_has_single_series(client: AsyncClient) -> Non
     mock_db.execute.return_value = mock_result
     app.dependency_overrides[get_db] = lambda: mock_db
 
-    with patch("app.routes.telemetry.telemetry_repo.query_telemetry", new_callable=AsyncMock) as mock_query:
+    _qry = "app.routes.telemetry.telemetry_repo.query_telemetry"
+    with patch(_qry, new_callable=AsyncMock) as mock_query:
         mock_query.return_value = [
             {
                 "bucket": datetime(2026, 4, 17, tzinfo=timezone.utc),
@@ -248,7 +249,8 @@ async def test_telemetry_empty_range_returns_empty_data(client: AsyncClient) -> 
     mock_db.execute.return_value = mock_result
     app.dependency_overrides[get_db] = lambda: mock_db
 
-    with patch("app.routes.telemetry.telemetry_repo.query_telemetry", new_callable=AsyncMock) as mock_query:
+    _qry = "app.routes.telemetry.telemetry_repo.query_telemetry"
+    with patch(_qry, new_callable=AsyncMock) as mock_query:
         mock_query.return_value = []
         resp = await client.get(
             "/api/telemetry",
@@ -290,7 +292,8 @@ async def test_all_valid_metrics_accepted(client: AsyncClient, metric: str) -> N
     mock_db.execute.return_value = mock_result
     app.dependency_overrides[get_db] = lambda: mock_db
 
-    with patch("app.routes.telemetry.telemetry_repo.query_telemetry", new_callable=AsyncMock) as mock_query:
+    _qry = "app.routes.telemetry.telemetry_repo.query_telemetry"
+    with patch(_qry, new_callable=AsyncMock) as mock_query:
         mock_query.return_value = []
         resp = await client.get(
             "/api/telemetry",
@@ -300,4 +303,6 @@ async def test_all_valid_metrics_accepted(client: AsyncClient, metric: str) -> N
     app.dependency_overrides.pop(get_current_user, None)
     app.dependency_overrides.pop(get_db, None)  # type: ignore[arg-type]
 
-    assert resp.status_code == 200, f"Expected 200 for metric={metric}, got {resp.status_code}: {resp.text}"
+    assert resp.status_code == 200, (
+        f"Expected 200 for metric={metric}, got {resp.status_code}: {resp.text}"
+    )

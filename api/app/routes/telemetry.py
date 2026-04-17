@@ -125,10 +125,22 @@ class TelemetryResponse(BaseModel):
 @telemetry_router.get("", response_model=TelemetryResponse)
 async def get_telemetry(
     board_id: uuid.UUID,
-    metric: str = Query(default="voltage_ln", description=f"One of: {', '.join(VALID_METRICS)}"),
-    start: datetime | None = Query(default=None, description="Range start (ISO 8601). Default: 1 h before end."),
-    end: datetime | None = Query(default=None, description="Range end (ISO 8601). Default: now (UTC)."),
-    bucket_minutes: int = Query(default=1, ge=1, le=60, description="Bucket width in minutes [1–60]."),
+    metric: str = Query(
+        default="voltage_ln",
+        description=f"One of: {', '.join(VALID_METRICS)}",
+    ),
+    start: datetime | None = Query(
+        default=None,
+        description="Range start (ISO 8601). Default: 1 h before end.",
+    ),
+    end: datetime | None = Query(
+        default=None,
+        description="Range end (ISO 8601). Default: now (UTC).",
+    ),
+    bucket_minutes: int = Query(
+        default=1, ge=1, le=60,
+        description="Bucket width in minutes [1–60].",
+    ),
     db: AsyncSession = Depends(get_db),
     _current_user: User = Depends(get_current_user),
 ) -> TelemetryResponse:

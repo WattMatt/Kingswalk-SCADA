@@ -7,6 +7,7 @@ requesting the fixture.
 """
 from __future__ import annotations
 
+import inspect
 import json
 from datetime import UTC, datetime
 from typing import Any
@@ -22,7 +23,6 @@ from app.services.notification_service import (
     cancel_escalation,
     notify_new_event,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -58,6 +58,19 @@ def _make_db(emails: list[str] | None = None) -> Any:
 
 
 # ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+
+def _close_coro_task(*args: Any, **kwargs: Any) -> MagicMock:
+    """Side-effect for mocked asyncio.create_task: close dangling coroutines."""
+    for arg in args:
+        if inspect.iscoroutine(arg):
+            arg.close()
+    return MagicMock()
+
+
+# ---------------------------------------------------------------------------
 # notify_new_event — severity filtering
 # ---------------------------------------------------------------------------
 
@@ -79,7 +92,7 @@ async def test_notify_creates_task_for_critical() -> None:
     db = _make_db(["admin@kw.test", "op@kw.test"])
     event = _make_event(severity="critical")
 
-    with patch("asyncio.create_task") as mock_task:
+    with patch("asyncio.create_task", side_effect=_close_coro_task) as mock_task:
         await notify_new_event(db, event)
 
     assert mock_task.called, "asyncio.create_task should be called for a critical event"
@@ -91,7 +104,7 @@ async def test_notify_creates_task_for_warning() -> None:
     db = _make_db(["op@kw.test"])
     event = _make_event(severity="warning")
 
-    with patch("asyncio.create_task") as mock_task:
+    with patch("asyncio.create_task", side_effect=_close_coro_task) as mock_task:
         await notify_new_event(db, event)
 
     assert mock_task.called
@@ -103,7 +116,7 @@ async def test_notify_no_task_when_no_recipients() -> None:
     db = _make_db(emails=[])
     event = _make_event(severity="error")
 
-    with patch("asyncio.create_task") as mock_task:
+    with patch("asyncio.create_task", side_effect=_close_coro_task) as mock_task:
         await notify_new_event(db, event)
 
     mock_task.assert_not_called()
@@ -120,7 +133,7 @@ async def test_notify_registers_escalation_in_redis(fake_redis: Any) -> None:
     db = _make_db()
     event = _make_event(event_id=99, severity="critical")
 
-    with patch("asyncio.create_task"):
+    with patch("asyncio.create_task", side_effect=_close_coro_task):
         await notify_new_event(db, event)
 
     raw = await fake_redis.get(f"{_ESCALATION_KEY_PREFIX}99")
@@ -139,7 +152,10 @@ async def test_notify_registers_escalation_in_redis(fake_redis: Any) -> None:
 async def test_cancel_escalation_removes_redis_key(fake_redis: Any) -> None:
     """cancel_escalation should delete the Redis key for the given event."""
     key = f"{_ESCALATION_KEY_PREFIX}42"
-    await fake_redis.set(key, json.dumps({"event_id": 42, "created_at": datetime.now(UTC).isoformat(), "severity": "error"}))
+    payload = json.dumps(
+        {"event_id": 42, "created_at": datetime.now(UTC).isoformat(), "severity": "error"}
+    )
+    await fake_redis.set(key, payload)
 
     await cancel_escalation(42)
 
@@ -201,7 +217,8 @@ async def test_process_escalations_fires_tier2_for_old_entry(fake_redis: Any) ->
         "severity": "critical",
     }))
 
-    with patch("app.services.notification_service._fire_tier2", new_callable=AsyncMock) as mock_fire:
+    _tier2_path = "app.services.notification_service._fire_tier2"
+    with patch(_tier2_path, new_callable=AsyncMock) as mock_fire:
         await _process_escalations()
 
     mock_fire.assert_awaited_once()
@@ -223,7 +240,8 @@ async def test_process_escalations_skips_recent_entry(fake_redis: Any) -> None:
         "severity": "warning",
     }))
 
-    with patch("app.services.notification_service._fire_tier2", new_callable=AsyncMock) as mock_fire:
+    _tier2_path = "app.services.notification_service._fire_tier2"
+    with patch(_tier2_path, new_callable=AsyncMock) as mock_fire:
         await _process_escalations()
 
     mock_fire.assert_not_awaited()
@@ -237,7 +255,8 @@ async def test_process_escalations_deletes_malformed_key(fake_redis: Any) -> Non
     key = f"{_ESCALATION_KEY_PREFIX}bad"
     await fake_redis.set(key, "NOT_JSON")
 
-    with patch("app.services.notification_service._fire_tier2", new_callable=AsyncMock) as mock_fire:
+    _tier2_path = "app.services.notification_service._fire_tier2"
+    with patch(_tier2_path, new_callable=AsyncMock) as mock_fire:
         await _process_escalations()  # Must not raise
 
     mock_fire.assert_not_awaited()

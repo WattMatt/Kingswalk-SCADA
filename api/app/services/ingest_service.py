@@ -6,6 +6,7 @@ Called by POST /api/ingest/batch. Central pipeline step for Phase 2b.
 from __future__ import annotations
 
 import json
+from collections.abc import Sequence
 from datetime import datetime
 from typing import Protocol
 
@@ -31,7 +32,7 @@ class _SampleLike(Protocol):
     sampled_at: datetime
 
 
-async def handle_batch(db: AsyncSession, samples: list[_SampleLike]) -> int:
+async def handle_batch(db: AsyncSession, samples: Sequence[_SampleLike]) -> int:
     """Full ingest pipeline for one batch from the edge gateway.
 
     Steps:

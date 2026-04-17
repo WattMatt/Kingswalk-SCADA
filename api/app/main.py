@@ -16,8 +16,8 @@ from app.routes.auth import router as auth_router
 from app.routes.events import events_router
 from app.routes.health import router as health_router
 from app.routes.ingest import ingest_router
-from app.routes.telemetry import telemetry_router
 from app.routes.mfa import router as mfa_router
+from app.routes.telemetry import telemetry_router
 from app.services import watchdog_service
 from app.services.notification_service import escalation_loop
 from app.ws.router import ws_router

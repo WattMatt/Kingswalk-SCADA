@@ -54,7 +54,8 @@ async def _record_failure(email: str, ip: str | None) -> None:
         await redis.set(f"auth:lock:{email}", "1", ex=_LOCKOUT_WINDOW)
 
     if ip:
-        ip_count: int = results[2]  # result of incr(auth:fail:ip:{ip}); only present when ip is truthy
+        # results[2] = incr(auth:fail:ip:{ip}); only present when ip is truthy
+        ip_count: int = results[2]
         if ip_count >= _LOCKOUT_ATTEMPTS:
             await redis.set(f"auth:lock:ip:{ip}", "1", ex=_LOCKOUT_WINDOW)
 

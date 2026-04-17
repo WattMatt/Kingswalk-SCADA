@@ -369,7 +369,10 @@ class Breaker(Base):
     essential_supply: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     device_ip: Mapped[str | None] = mapped_column(INET, nullable=True)
     protocol: Mapped[str | None] = mapped_column(
-        Enum("modbus_tcp", "iec61850", "dual", name="protocol_enum", schema="assets", create_type=False),
+        Enum(
+            "modbus_tcp", "iec61850", "dual",
+            name="protocol_enum", schema="assets", create_type=False,
+        ),
         nullable=True,
     )
     installed_at: Mapped[date | None] = mapped_column(Date, nullable=True)
